@@ -1,0 +1,146 @@
+Array
+(
+    [time] => 2026-06-26 16:13:30
+    [method] => GET
+    [get] => Array
+        (
+        )
+
+    [post_raw] => 
+    [session_id] => 
+    [session] => Array
+        (
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:13:30
+    [method] => GET
+    [get] => Array
+        (
+            [get_notes] => 
+        )
+
+    [post_raw] => 
+    [session_id] => 
+    [session] => Array
+        (
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:13:32
+    [method] => POST
+    [get] => Array
+        (
+        )
+
+    [post_raw] => {"id":null,"title":"as","content":"sa","csrf_token":"70323c371976a8a2dcf9578da32ae6de1e70c3e6ad62af8cd7594d903037bce0"}
+    [session_id] => 
+    [session] => Array
+        (
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:18:14
+    [method] => GET
+    [get] => Array
+        (
+        )
+
+    [post_raw] => 
+    [session_id] => h389veap4q3s0psdh94oacr1d9
+    [session] => Array
+        (
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:18:16
+    [method] => GET
+    [get] => Array
+        (
+        )
+
+    [post_raw] => 
+    [session_id] => 9r381maihufv3f5a5kclfke89d
+    [session] => Array
+        (
+            [user_id] => 5
+            [username] => AxelJhay0
+            [role] => creator
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:18:16
+    [method] => GET
+    [get] => Array
+        (
+            [get_notes] => 
+        )
+
+    [post_raw] => 
+    [session_id] => 9r381maihufv3f5a5kclfke89d
+    [session] => Array
+        (
+            [user_id] => 5
+            [username] => AxelJhay0
+            [role] => creator
+            [csrf_token] => 9abad98e2e3a541a4ab6aa6a1369fccccce2212a37dce6da75331549f5017b19
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---
+Array
+(
+    [time] => 2026-06-26 16:18:18
+    [method] => POST
+    [get] => Array
+        (
+        )
+
+    [post_raw] => {"id":null,"title":"Titles","content":"sa","csrf_token":"9abad98e2e3a541a4ab6aa6a1369fccccce2212a37dce6da75331549f5017b19"}
+    [session_id] => 9r381maihufv3f5a5kclfke89d
+    [session] => Array
+        (
+            [user_id] => 5
+            [username] => AxelJhay0
+            [role] => creator
+            [csrf_token] => 9abad98e2e3a541a4ab6aa6a1369fccccce2212a37dce6da75331549f5017b19
+        )
+
+    [user_agent] => Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0
+    [ip] => 127.0.0.1
+)
+
+---

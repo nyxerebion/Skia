@@ -1,0 +1,22 @@
+[03-Jul-2026 02:17:25 Europe/Berlin] Index session: Array
+(
+)
+
+[03-Jul-2026 02:17:25 Europe/Berlin] Session cookie: Array
+(
+    [PHPSESSID] => piv2jthv630jg1qnt8rdgg3sf1
+)
+
+[03-Jul-2026 02:17:25 Europe/Berlin] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\skia/js/general.css in C:\xampp\htdocs\skia\guest-page.php on line 291
+[03-Jul-2026 02:18:32 Europe/Berlin] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\skia/js/general.css in C:\xampp\htdocs\skia\guest-page.php on line 291
+[03-Jul-2026 02:18:33 Europe/Berlin] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\skia/js/general.css in C:\xampp\htdocs\skia\guest-page.php on line 291
+[03-Jul-2026 02:18:35 Europe/Berlin] Index session: Array
+(
+)
+
+[03-Jul-2026 02:18:35 Europe/Berlin] Session cookie: Array
+(
+    [PHPSESSID] => piv2jthv630jg1qnt8rdgg3sf1
+)
+
+[03-Jul-2026 02:18:35 Europe/Berlin] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\skia/js/general.css in C:\xampp\htdocs\skia\guest-page.php on line 291
