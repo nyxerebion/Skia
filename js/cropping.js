@@ -1,3 +1,4 @@
+// cropping.js
 document.addEventListener("DOMContentLoaded", function () {
   const avatarInput = document.getElementById("avatarInput");
   const cropBtn = document.getElementById("cropBtn");
@@ -47,32 +48,42 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      document.getElementById("uploadControls").classList.add("hidden");
-      cropBtn.classList.add("visible");
-      cropBtn.style.display = "";
+      const uploadControls = document.getElementById("uploadControls");
+      if (uploadControls) uploadControls.classList.add("hidden");
+      if (cropBtn) {
+        cropBtn.classList.add("visible");
+        cropBtn.style.display = "none";
+      }
 
       const reader = new FileReader();
       reader.onload = function (event) {
         cropImage.src = event.target.result;
         cropModal.style.display = "flex";
-        cropBtn.style.display = "none";
 
-        requestAnimationFrame(function () {
-          if (cropper) cropper.destroy();
-          cropper = new Cropper(cropImage, {
-            aspectRatio: 1,
-            viewMode: 1,
-            dragMode: "move",
-            autoCropArea: 0.8,
-            restore: false,
-            guides: true,
-            center: true,
-            highlight: false,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
+        // Wait for image to load before initializing cropper
+        cropImage.onload = function () {
+          requestAnimationFrame(function () {
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(cropImage, {
+              aspectRatio: 1,
+              viewMode: 1,
+              dragMode: "move",
+              autoCropArea: 0.8,
+              restore: false,
+              guides: true,
+              center: true,
+              highlight: false,
+              cropBoxMovable: true,
+              cropBoxResizable: true,
+              toggleDragModeOnDblclick: false,
+              checkCrossOrigin: false,
+              checkOrientation: false,
+              responsive: true,
+              background: false,
+              modal: true,
+            });
           });
-        });
+        };
       };
       reader.readAsDataURL(file);
     });
@@ -91,9 +102,12 @@ document.addEventListener("DOMContentLoaded", function () {
       cropModal.style.display = "none";
       avatarInput.value = "";
       currentFile = null;
-      document.getElementById("uploadControls").classList.remove("hidden");
-      cropBtn.classList.remove("visible");
-      cropBtn.style.display = "none";
+      const uploadControls = document.getElementById("uploadControls");
+      if (uploadControls) uploadControls.classList.remove("hidden");
+      if (cropBtn) {
+        cropBtn.classList.remove("visible");
+        cropBtn.style.display = "none";
+      }
     });
   }
 
@@ -104,8 +118,16 @@ document.addEventListener("DOMContentLoaded", function () {
       const canvas = cropper.getCroppedCanvas({
         width: 300,
         height: 300,
+        minWidth: 256,
+        minHeight: 256,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        fillColor: "#fff",
+        imageSmoothingEnabled: true,
         imageSmoothingQuality: "high",
       });
+
+      console.log("Canvas size:", canvas.width, canvas.height);
 
       canvas.toBlob(
         function (blob) {
@@ -123,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cropper = null;
           }
           cropModal.style.display = "none";
-          cropBtn.style.display = "inline-block";
+          if (cropBtn) cropBtn.style.display = "inline-block";
         },
         currentFile.type,
         0.9,

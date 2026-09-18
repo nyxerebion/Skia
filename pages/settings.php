@@ -50,6 +50,11 @@ $name_updated_at = $stmt->fetchColumn();
     <title>Settings | Skia</title>
     <link rel="stylesheet" href="../css/general.css?v=<?= filemtime(__DIR__ . '/../css/general.css') ?>">
     <link rel="stylesheet" href="../css/settings.css?v=<?= filemtime(__DIR__ . '/../css/settings.css') ?>">
+
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <!-- Cropper.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 </head>
 
 <body>
@@ -92,6 +97,19 @@ $name_updated_at = $stmt->fetchColumn();
 
                         <div class="section">
                             <h3>Profile details</h3>
+
+                            <div class="info-wrapper">
+                                <div class="info-item solo" id="avatarItem">
+                                    <span class="info-name">Avatar</span>
+                                    <span class="info-value avatar-preview">
+                                        <?= getUserAvatar($current_user['id']) ?>
+                                    </span>
+                                    <span class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
+                                            <path d="m9 18 6-6-6-6" />
+                                        </svg></span>
+                                </div>
+                            </div>
 
                             <div class="info-wrapper">
                                 <div class="info-item" id="usernameItem">
@@ -364,9 +382,54 @@ $name_updated_at = $stmt->fetchColumn();
         </div>
     </div>
 
+    <div class="popup-overlay" id="avatarPopup">
+        <div class="popup-card">
+            <button class="close-btn" onclick="closePopup(this.parentElement.parentElement)">✕</button>
+            <div class="content-wrapper">
+                <h2>Profile Picture</h2>
+                <p class="cooldown-notice">⏳ You can change your avatar anytime.</p>
+
+                <div class="avatar-preview">
+                    <?= getUserAvatar($current_user['id']) ?>
+                </div>
+
+                <?php if (!empty($current_user['avatar'])): ?>
+                    <button type="button" id="removeAvatarBtn" class="btn-remove">Remove Avatar</button>
+                <?php endif; ?>
+
+                <form id="avatarForm" method="POST" enctype="multipart/form-data" action="../api/user/update_avatar.php">
+                    <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
+                    <input type="hidden" name="upload_avatar" value="1">
+                    <input type="hidden" name="crop_data" id="cropData">
+
+                    <div class="avatar-upload">
+                        <div id="uploadControls">
+                            <label for="avatarInput">Update Avatar</label>
+                            <input type="file" id="avatarInput" name="avatar" accept="image/*" required>
+                        </div>
+                        <button type="button" id="cropBtn" class="btn-save" style="display:none;">Crop & Upload</button>
+                        <small>Max 5MB. JPG, PNG, GIF, WEBP only.</small>
+                    </div>
+                </form>
+
+                <!-- Crop modal -->
+                <div id="cropModal" style="display: none;">
+                    <div class="crop-modal-content">
+                        <h3>Crop Image</h3>
+                        <img id="cropImage" src="" alt="Crop">
+                        <div class="crop-actions">
+                            <button id="cancelCrop" class="btn-cancel">Cancel</button>
+                            <button id="confirmCrop" class="btn-save">✅ Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../js/general.js?v=<?= filemtime(__DIR__ . '/../js/general.js') ?>"></script>
     <script src="../js/settings.js?v=<?= filemtime(__DIR__ . '/../js/settings.js') ?>"></script>
-
+    <script src="../js/cropping.js?v=<?= filemtime(__DIR__ . '/../js/cropping.js') ?>"></script>
 </body>
 
 </html>

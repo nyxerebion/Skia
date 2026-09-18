@@ -67,84 +67,6 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$current_user['id']]);
 $liked_posts = $stmt->fetchAll();
-
-// Add this to profile.php right after the other POST handlers
-
-// Handle avatar upload
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
-    validateCSRFToken($_POST['csrf_token'] ?? '');
-
-    if (!isset($_FILES['avatar']) || $_FILES['avatar']['error'] !== UPLOAD_ERR_OK) {
-        setFlashMessage('No file uploaded or upload error.', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    $file = $_FILES['avatar'];
-    $maxSize = 5 * 1024 * 1024; // 5MB
-
-    if ($file['size'] > $maxSize) {
-        setFlashMessage('File too large. Maximum 5MB.', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    $uploadDir = __DIR__ . '/../uploads/avatars/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-
-    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-    if (!in_array($extension, $allowed)) {
-        setFlashMessage('Invalid file type. Only JPG, PNG, GIF, and WEBP allowed.', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    $uploaded = false;
-
-    if ($extension === 'webp') {
-        $image = @imagecreatefromwebp($file['tmp_name']);
-        if ($image === false) {
-            setFlashMessage('Invalid WebP image', 'error');
-            header('Location: profile.php');
-            exit;
-        }
-        $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.jpg';
-        $filepath = $uploadDir . $filename;
-        $uploaded = imagejpeg($image, $filepath, 90);
-        $image = null;
-    } else {
-        $filename = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
-        $filepath = $uploadDir . $filename;
-        $uploaded = move_uploaded_file($file['tmp_name'], $filepath);
-    }
-
-    if (!$uploaded) {
-        setFlashMessage('Failed to upload image.', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    // Delete old avatar
-    $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $oldAvatar = $stmt->fetchColumn();
-    if ($oldAvatar && file_exists($uploadDir . $oldAvatar)) {
-        unlink($uploadDir . $oldAvatar);
-    }
-
-    // Update database
-    $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
-    $stmt->execute([$filename, $_SESSION['user_id']]);
-
-    logAction('avatar_updated');
-    setFlashMessage('Avatar updated successfully!', 'success');
-    header('Location: profile.php');
-    exit;
-}
 ?>
 
 <!DOCTYPE html>
@@ -155,11 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
     <title>Profile | Skia</title>
     <link rel="stylesheet" href="../css/general.css?v=<?= filemtime(__DIR__ . '/../css/general.css') ?>">
     <link rel="stylesheet" href="../css/profile.css?v=<?= filemtime(__DIR__ . '/../css/profile.css') ?>">
-
-    <!-- Cropper.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    <!-- Cropper.js JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 </head>
 
 <body>
@@ -407,46 +324,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                 </div>
             </section>
 
-            <!-- Avatar Upload with Crop -->
-            <section class="avatar-section">
-                <h3>Profile Picture</h3>
-
-                <!-- Current avatar preview -->
-                <div class="avatar-preview">
-                    <?= getUserAvatar($current_user['id']) ?>
-                </div>
-
-                <!-- Upload form -->
-                <form id="avatarForm" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
-                    <input type="hidden" name="upload_avatar" value="1">
-                    <input type="hidden" name="crop_data" id="cropData">
-
-                    <div class="avatar-upload">
-                        <div id="uploadControls">
-                            <label for="avatarInput">Choose Image</label>
-                            <input type="file" id="avatarInput" name="avatar" accept="image/*" required>
-                        </div>
-                        <button type="button" id="cropBtn" class="btn-save" style="display:none;">Crop & Upload</button>
-                        <small>Max 5MB. JPG, PNG, GIF, WEBP only.</small>
-                    </div>
-                </form>
-
-                <!-- Crop modal -->
-                <div id="cropModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;">
-                    <div style="background:var(--bg-surface);border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:90vh;overflow:auto;">
-                        <h3 style="margin-bottom:12px;">Crop Image</h3>
-                        <div style="max-height:400px;overflow:hidden;">
-                            <img id="cropImage" src="" alt="Crop" style="max-width:100%;">
-                        </div>
-                        <div style="display:flex;gap:12px;margin-top:16px;justify-content:flex-end;">
-                            <button id="cancelCrop" class="btn-cancel">Cancel</button>
-                            <button id="confirmCrop" class="btn-save">✅ Apply</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section class="data-section">
                 <h3>Whack Game Stats</h3>
 
@@ -606,7 +483,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
     </main>
 
     <script src="../js/general.js?v=<?= filemtime(__DIR__ . '/../js/general.js') ?>"></script>
-    <script src="../js/cropping.js?v=<?= filemtime(__DIR__ . '/../js/cropping.js') ?>"></script>
 </body>
 
 </html>

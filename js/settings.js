@@ -90,12 +90,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  const avatarItem = document.getElementById("avatarItem");
+  if (avatarItem) {
+    avatarItem.addEventListener("click", () => {
+      const popup = document.getElementById("avatarPopup");
+      openPopup(popup);
+    });
+  }
+
+  // After other popup checks
+  if (popup === "avatar") {
+    const popupEl = document.getElementById("avatarPopup");
+    if (popupEl) {
+      openPopup(popupEl);
+    }
+  }
+
+  const removeAvatarBtn = document.getElementById("removeAvatarBtn");
+  if (removeAvatarBtn) {
+    removeAvatarBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      removeAvatar();
+    });
+  }
+
   updateCharCount();
 });
 
 let usernameCheckTimeout = null;
 let nameCheckTimeout = null;
-let bioCheckTimeout = null;  
+let bioCheckTimeout = null;
 let usernameValid = null;
 let nameValid = null;
 let bioValid = null;
@@ -890,4 +914,27 @@ function handlePasswordUpdate() {
         submitBtn.value = originalText;
       }
     });
+}
+
+function removeAvatar() {
+  if (!confirm("Remove your avatar? Initials will be used instead")) return;
+
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = meta ? meta.content : "";
+
+  fetch(API_URL + "/user/remove_avatar.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ csrf_token: csrfToken }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        toast("Avatar removed", "success");
+        setTimeout(() => location.reload(), 800);
+      } else {
+        toast(data.error || "Failed to remove", "error");
+      }
+    })
+    .catch(() => toast("Network error", "error"));
 }
