@@ -62,6 +62,7 @@ It started as a whack-a-gold clone. It became something bigger.
 
 ## Project Structure
 
+```text
 skia/
 ├── api/           → JSON endpoints
 ├── backend/       → Config, helpers, email
@@ -73,9 +74,7 @@ skia/
 ├── pages/         → Contents, settings, profile
 ├── posts/         → Post feed
 └── security/      → Auth and validation
-
----
-
+```
 
 ## Getting Started
 
