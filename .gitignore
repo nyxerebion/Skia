@@ -1,3 +1,22 @@
+# Environment
 .env
 .env.local
 .env.*.local
+
+# Dependencies
+vendor/
+
+# User uploads
+uploads/
+
+# Editor settings
+.vscode/
+
+# Logs
+*.log
+database/error.log
+pages/debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
