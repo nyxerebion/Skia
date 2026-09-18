@@ -19,12 +19,27 @@ if (file_exists($project_root . '/.env') && class_exists(Dotenv::class)) {
 // 1. Session settings
 ini_set('session.cache_limiter', 'nocache');
 ini_set('session.cache_expire', '0');
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.use_strict_mode', 1);
+ini_set('session.cookie_lifetime', 0);
+ini_set('expose_php', 0);
 
 // 2. START SESSION HERE
 if (session_status() === PHP_SESSION_NONE) {
+    // Detect if we are on HTTPS (important for the 'secure' flag)
+    $is_https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $is_https, // Only send cookie over HTTPS
+        'httponly' => true,    // Prevent JavaScript access (XSS protection)
+        'samesite' => 'Lax',   // CSRF protection
+    ]);
+
+    // Prevent session fixation
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+
     session_start();
 }
 

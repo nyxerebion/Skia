@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             secure_session_regenerate();
             clearRateLimit($pdo, $ip, 'login');
-            setcookie(session_name(), session_id(), 0, '/', '', false, true);
 
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
