@@ -16,7 +16,3 @@ uploads/
 *.log
 database/error.log
 pages/debug.log
-
-# OS files
-.DS_Store
-Thumbs.db
