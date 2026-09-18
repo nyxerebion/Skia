@@ -7,6 +7,7 @@ function logAction($action) {
     
     $user_id = $_SESSION['user_id'];
     $page = basename($_SERVER['PHP_SELF']);
+    $ip = getRealIP();
     $timestamp = date('Y-m-d H:i:s');
     
     // Check last entry for same action/page in last 60 seconds
@@ -26,8 +27,8 @@ function logAction($action) {
         }
     }
     
-    $stmt = $pdo->prepare("INSERT INTO activity_log (user_id, action, page, timestamp) VALUES (?, ?, ?, ?)");
-    return $stmt->execute([$user_id, $action, $page, $timestamp]);
+    $stmt = $pdo->prepare("INSERT INTO activity_log (user_id, action, page, ip_address, timestamp) VALUES (?, ?, ?, ?, ?)");
+    return $stmt->execute([$user_id, $action, $page, $ip, $timestamp]);
 }
 
 function addHistory($user_id, $action) {

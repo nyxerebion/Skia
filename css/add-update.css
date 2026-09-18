@@ -64,6 +64,7 @@ main {
 .form-group textarea {
   resize: vertical;
   min-height: 120px;
+  max-height: 400px;
 }
 
 .form-group select {

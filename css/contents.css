@@ -20,7 +20,7 @@
   background: var(--bg-body);
   color: white;
   padding: 12px 8px;
-  font-size: clamp(0.8rem 1.8vw 1.1rem);
+  font-size: clamp(0.8rem, 1.8vw, 1.1rem);
 }
 
 .sub-tab-btn {
@@ -31,7 +31,7 @@
   background: var(--bg-body);
   color: white;
   padding: 10px 4px;
-  font-size: clamp(0.7rem 1.5vw 0.9rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
 }
 
 @media (max-width: 600px) {
@@ -110,7 +110,7 @@ main > * {
 
 .top-players-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
 }
 
@@ -175,7 +175,6 @@ main > * {
 
 @media (max-width: 600px) {
   .top-players-grid {
-    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -221,8 +220,6 @@ main > * {
 
 .table-data {
   width: 100%;
-  min-width: 650px;
-  table-layout: fixed;
   border-collapse: collapse;
 }
 
@@ -252,11 +249,7 @@ main > * {
 
 .table-data tbody td:first-child,
 .table-data thead th:first-child {
-  width: 60px;
-  min-width: 60px;
-  max-width: 60px;
   text-align: center;
-  white-space: nowrap;
 }
 
 .table-data .rank-1 {
@@ -264,11 +257,13 @@ main > * {
   font-weight: 700;
   font-size: 1.4rem;
 }
+
 .table-data .rank-2 {
   color: #c0c0c0;
   font-weight: 700;
   font-size: 1.4rem;
 }
+
 .table-data .rank-3 {
   color: #cd7f32;
   font-weight: 700;
@@ -296,28 +291,20 @@ main > * {
   color: #1d4ed8;
   border: 1px solid #93c5fd;
 }
+
 .role-badge.creator {
   background: #fef9c3;
   color: #ca8a04;
   border: 1px solid #fde047;
 }
+
 .role-badge.user {
   background: #e2e8f0;
   color: #1e293b;
   border: 1px solid #94a3b8;
 }
 
-@media (max-width: 700px) {
-  .table-data {
-    min-width: 480px;
-  }
-}
-
 @media (max-width: 500px) {
-  .table-data {
-    min-width: 380px;
-  }
-
   .table-data thead th,
   .table-data tbody td {
     padding: 6px 10px;
@@ -326,10 +313,6 @@ main > * {
 }
 
 @media (max-width: 400px) {
-  .table-data {
-    min-width: 320px;
-  }
-
   .table-data thead th,
   .table-data tbody td {
     padding: 4px 8px;
@@ -343,22 +326,94 @@ main > * {
 }
 
 .user-bio {
-    max-width: 150px;
+    display: inline-block;
+    max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    cursor: help;
-    transition: max-width 0.3s;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: color 0.2s;
 }
 
 .user-bio:hover {
-    max-width: 300px;
-    overflow: visible;
-    white-space: normal;
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+/* Bio Modal */
+.bio-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.bio-modal {
     background: var(--bg-surface);
-    padding: 4px 8px;
-    border-radius: 4px;
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
     position: relative;
-    z-index: 10;
+    animation: modalFadeIn 0.2s ease;
+}
+
+.bio-modal h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    padding-right: 30px;
+}
+
+.bio-modal p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.bio-modal .close-modal {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: none;
+}
+
+.bio-modal .close-modal:hover {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

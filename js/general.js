@@ -3,6 +3,14 @@ let isPhone = window.matchMedia("(max-width: 576px)");
 
 let sidebar, sidebar_title, header_right, toggleBtn, settingsMenu;
 
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
+
+const SITE_URL = isLocalhost
+  ? "http://localhost/skia"
+  : "https://skia.unaux.com";
+
 function initializeElements() {
   sidebar = document.querySelector("aside");
   sidebar_title = document.querySelector(".sidebar-title");
@@ -15,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeElements();
   handleMessage();
   loadTheme();
+  getOnlineUsers();
+  getUserStatuses();
 
   if (!sidebar) return;
   createSidebarButton();
@@ -176,8 +186,26 @@ const API_URL = window.location.pathname.includes("/skia")
   : "/api";
 
 function markRead(id, link) {
+  console.log("markRead called:", { id, link });
+
   const meta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = meta ? meta.content : "";
+
+  // If link is empty or null, still mark as read then reload
+  const hasLink =
+    link && link !== "null" && link !== "" && link !== "undefined";
+
+  // Clean the link if it exists
+  if (hasLink) {
+    link = link.trim();
+    if (
+      !link.startsWith("http://") &&
+      !link.startsWith("https://") &&
+      !link.startsWith("/")
+    ) {
+      link = window.location.origin + "/" + link.replace(/^\/+/, "");
+    }
+  }
 
   fetch(API_URL + "/mark-notification-read.php", {
     method: "POST",
@@ -191,14 +219,52 @@ function markRead(id, link) {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success && link) {
-        window.location.href = link;
+      console.log("markRead response:", data);
+
+      if (data.success) {
+        // Update UI - remove unread class
+        const item = document.querySelector(
+          `.notification-item[data-id="${id}"]`,
+        );
+        if (item) {
+          item.classList.remove("unread");
+        }
+
+        // Update badge count
+        const badge = document.querySelector(".notification-badge");
+        if (badge) {
+          const count = parseInt(badge.textContent) - 1;
+          if (count > 0) {
+            badge.textContent = count;
+          } else {
+            badge.remove();
+          }
+        }
+
+        // Redirect or reload
+        if (hasLink) {
+          console.log("Replacing with:", link);
+          window.location.replace(link);
+        } else {
+          console.log("No link, reloading");
+          location.reload();
+        }
+      } else {
+        // If mark read fails
+        if (hasLink) {
+          window.location.replace(link);
+        } else {
+          location.reload();
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error marking as read:", error);
+      if (hasLink) {
+        window.location.replace(link);
       } else {
         location.reload();
       }
-    })
-    .catch(() => {
-      location.reload();
     });
 }
 
@@ -241,39 +307,347 @@ document.addEventListener("click", (e) => {
   }
 });
 
-function toast(message, type = 'info') {
-    // Remove existing toast
-    const existing = document.querySelector('.toast-container');
-    if (existing) existing.remove();
+document.addEventListener("click", (e) => {
+  const onlineUsersView = document.querySelector(".online-users-view");
+  const trigger = document.querySelector(".view-online-users");
+  if (!onlineUsersView) return;
 
-    const container = document.createElement('div');
-    container.className = 'toast-container';
-    
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    
-    container.appendChild(toast);
-    document.body.appendChild(container);
+  if (
+    !onlineUsersView.contains(e.target) &&
+    (!trigger || !trigger.contains(e.target))
+  ) {
+    onlineUsersView.style.display = "none";
+  }
+});
 
-    // Auto-remove after 3 seconds
-    setTimeout(() => {
-        toast.classList.add('toast-fade-out');
-        setTimeout(() => container.remove(), 300);
-    }, 3000);
+function toast(message, type = "info") {
+  // Remove existing toast
+  const existing = document.querySelector(".toast-container");
+  if (existing) existing.remove();
+
+  const container = document.createElement("div");
+  container.className = "toast-container";
+
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = message;
+
+  container.appendChild(toast);
+  document.body.appendChild(container);
+
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.add("toast-fade-out");
+    setTimeout(() => container.remove(), 300);
+  }, 3000);
 }
 
 function formatTime(seconds) {
-    if (seconds < 60) return seconds + 's';
+  if (seconds < 60) return seconds + "s";
 
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
 
-    if (hours > 0) {
-        return hours + 'h ' + minutes + 'm';
-    } else if (minutes > 0) {
-        return minutes + 'm ' + secs + 's';
+  if (hours > 0) {
+    return hours + "h " + minutes + "m";
+  } else if (minutes > 0) {
+    return minutes + "m " + secs + "s";
+  }
+  return seconds + "s";
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const typing = document.querySelector(".typing");
+  if (typing) {
+    const typingDuration = 5000;
+
+    setTimeout(() => {
+      typing.classList.remove("typing");
+    }, typingDuration);
+  }
+
+  // Event delegation for notification items
+  document.addEventListener("click", function (e) {
+    const item = e.target.closest(".notification-item");
+    if (item) {
+      const id = item.dataset.id;
+      const link = item.dataset.link || "";
+      if (id) {
+        markRead(id, link);
+      }
     }
-    return seconds + 's';
+  });
+});
+
+function getOnlineUsers() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = meta ? meta.content : "";
+
+  fetch(API_URL + "/get-online-users.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      csrf_token: csrfToken,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Update count
+        const onlineUsersElement = document.querySelector(".online-users");
+        if (onlineUsersElement) {
+          updateOnlineCountDisplay(data.online_users_count);
+
+          const onlineUsersCount = document.getElementById("onlineUsersCount");
+          if (onlineUsersCount)
+            onlineUsersCount.textContent = `(${data.online_users_count})`;
+        }
+
+        // Update user list
+        updateOnlineUsersDisplay(data.online_users);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching online users:", error);
+    });
+}
+
+function updateOnlineCountDisplay(data) {
+  const onlineUsersElement = document.querySelector(".online-users");
+  if (!onlineUsersElement) return;
+
+  const newCount = data ?? "0";
+
+  // Only animate if count changed
+  if (onlineUsersElement.textContent !== String(newCount)) {
+    onlineUsersElement.classList.remove("pop");
+    // Trigger reflow
+    void onlineUsersElement.offsetWidth;
+    onlineUsersElement.textContent = newCount;
+    onlineUsersElement.classList.add("pop");
+  } else {
+    onlineUsersElement.textContent = newCount;
+  }
+}
+
+setInterval(
+  getOnlineUsers,
+  10000, // Update every 10 seconds
+);
+
+function getUserStatuses() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = meta ? meta.content : "";
+
+  fetch(API_URL + "/get-user-status.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      csrf_token: csrfToken,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        data.users.forEach((user) => {
+          updateUserStatus(user.id, user.status);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching user statuses:", error);
+    });
+}
+
+function updateUserStatus(userId, status) {
+  document.querySelectorAll(`.status[data-user="${userId}"]`).forEach((dot) => {
+    dot.className = "status";
+    dot.classList.add(`status-${status}`);
+  });
+}
+
+setInterval(getUserStatuses, 10000); // Update every 10 seconds
+
+function updateOnlineUsersDisplay(users) {
+  const pathname = window.location.pathname;
+
+  const onlineUsersList = document.querySelector(".online-users-list");
+  if (!onlineUsersList) return;
+
+  onlineUsersList.innerHTML = "";
+
+  if (!users || users.length === 0) {
+    onlineUsersList.innerHTML = '<span class="no-users">No one online</span>';
+    return;
+  }
+
+  users.forEach((user) => {
+    const item = document.createElement("div");
+    item.className = "online-user-item";
+
+    let avatarHtml;
+    if (user.avatar_url) {
+      avatarHtml = `<img src="${user.avatar_url}" alt="${user.username}" class="avatar-img">`;
+    } else {
+      avatarHtml = `<div class="avatar-placeholder">${user.username.charAt(0).toUpperCase()}</div>`;
+    }
+
+    const isSelf = user.is_self || false;
+    const isFollowing = user.is_following || false;
+    const followText = isFollowing ? "Unfollow" : "Follow";
+    const followClass = isFollowing ? "following" : "";
+
+    // Build controls HTML
+    let controlsHtml;
+    if (isSelf) {
+      controlsHtml = `<span class="self-label">You</span>`;
+    } else {
+      controlsHtml = `
+                <button class="follow-btn ${followClass}" 
+                        data-user="${user.id}" 
+                        onclick="event.stopPropagation(); event.preventDefault(); toggleFollow(${user.id});">
+                    ${followText}
+                </button>
+            `;
+    }
+
+    item.innerHTML = `
+            <div class="online-user-content" onclick="redirectToProfile(event, '${user.hashed_id}')">
+                <div class="wrapper-left">
+                    <div class="user-info">
+                        <div class="avatar-wrapper">
+                            <span class="avatar-container avatar-sm">
+                                ${avatarHtml}
+                                <div class="status status-online" data-user="${user.id}"></div>
+                            </span>
+                        </div>
+
+                        <div class="user-details">
+                            <div class="main-details">
+                                <span class="username">${user.username}</span>
+                                <span class="role-badge ${user.role}">${user.role}</span>
+                            </div>
+                            <div class="follow-stats">
+                                <span class="followers">${user.followers || 0} Followers</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wrapper-right">
+                    ${!pathname.includes("guest-page.php") ? `<div class="user-controls">${controlsHtml}</div>` : ""}
+                </div>
+            </div>
+        `;
+    onlineUsersList.appendChild(item);
+  });
+}
+
+function redirectToProfile(event, profileId) {
+  if (event.target.closest(".follow-btn")) return;
+  location.href = `${SITE_URL}/pages/view-profile.php?id=${profileId}`;
+}
+
+function viewOnlineUsers() {
+  const onlineUsersView = document.querySelector(".online-users-view");
+  if (!onlineUsersView) return;
+
+  // Toggle visibility
+  if (
+    onlineUsersView.style.display === "none" ||
+    onlineUsersView.style.display === ""
+  ) {
+    onlineUsersView.style.display = "block";
+  } else {
+    onlineUsersView.style.display = "none";
+  }
+}
+
+function closeOnlineUsers() {
+  const onlineUsersView = document.querySelector(".online-users-view");
+  if (onlineUsersView) onlineUsersView.style.display = "none";
+}
+
+function toggleFollow(userId) {
+  const btns = document.querySelectorAll(`.follow-btn[data-user="${userId}"]`);
+
+  if (!btns.length) return;
+
+  // Store original texts for all buttons
+  const originalTexts = [];
+  btns.forEach((btn, index) => {
+    originalTexts[index] = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "⏳";
+  });
+
+  const csrfToken =
+    document.querySelector('meta[name="csrf-token"]')?.content || "";
+
+  fetch(API_URL + "/follow.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      csrf_token: csrfToken,
+    }),
+  })
+    .then((response) => {
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      return response.json();
+    })
+    .then((data) => {
+      if (data.success) {
+        // Update all buttons
+        btns.forEach((btn, index) => {
+          btn.textContent = data.following ? "Unfollow" : "Follow";
+          if (data.following) {
+            btn.classList.add("following");
+          } else {
+            btn.classList.remove("following");
+          }
+          btn.disabled = false;
+        });
+
+        toast(
+          data.following ? "Followed successfully" : "Unfollowed successfully",
+          "success",
+        );
+
+        if (typeof getOnlineUsers === "function") {
+          getOnlineUsers();
+        }
+      } else {
+        // Restore all buttons
+        btns.forEach((btn, index) => {
+          btn.textContent = originalTexts[index];
+          btn.disabled = false;
+        });
+        toast(data.error || "Action failed", "error");
+      }
+    })
+    .catch((err) => {
+      console.error("Error:", err);
+      btns.forEach((btn, index) => {
+        btn.textContent = originalTexts[index];
+        btn.disabled = false;
+      });
+      toast("Network error", "error");
+    });
+}
+
+function autoResize(textarea) {
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+}
+
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
 }

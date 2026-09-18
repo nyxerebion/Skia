@@ -45,15 +45,38 @@ if ($is_following) {
     // Follow
     $stmt = $pdo->prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)");
     $stmt->execute([$_SESSION['user_id'], $follow_id]);
+
     clearRateLimit($pdo, $ip, $action);
     clearRateLimit($pdo, $ip, 'follow_global');
     echo json_encode(['success' => true, 'following' => true]);
 
-    addNotification(
+    // Check if a follow notification was sent in the last 60 seconds
+    $stmt = $pdo->prepare("
+        SELECT created_at FROM notifications 
+        WHERE user_id = ? 
+        AND type = 'info' 
+        AND title = '🥳 New Follower'
+        AND message LIKE ?
+        ORDER BY created_at DESC LIMIT 1
+    ");
+    $stmt->execute([
         $follow_id,
-        'info',
-        '🥳 New Follower',
-        $_SESSION['username'] . ' started following you.',
-        SITE_URL . '/pages/profile.php'
-    );
+        '%' . $_SESSION['username'] . '%started following you%'
+    ]);
+    $last_notification = $stmt->fetchColumn();
+
+    // Only send if no recent notification
+    if ($last_notification && strtotime($last_notification) > time() - 60) {
+        // Skip - too soon
+    } else {
+        addNotification(
+            $follow_id,
+            'info',
+            '🥳 New Follower',
+            $_SESSION['username'] . ' started following you.',
+            SITE_URL . '/pages/profile.php',
+            'user',
+            $follow_id
+        );
+    }
 }

@@ -29,15 +29,16 @@ function timeAgo($datetime)
     }
 }
 
-function addNotification($user_id, $type, $title, $message, $link = null)
+function addNotification($user_id, $type, $title, $message, $link = null, $sender_type = 'system', $sender_id = null)
 {
     global $pdo;
 
     $stmt = $pdo->prepare("
-        INSERT INTO notifications (user_id, type, title, message, link, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO notifications (user_id, type, title, message, link, sender_type, sender_id, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     ");
-    return $stmt->execute([$user_id, $type, $title, $message, $link, date('Y-m-d H:i:s')]);
+    $stmt->execute([$user_id, $type, $title, $message, $link, $sender_type, $sender_id]);
+    return $pdo->lastInsertId();
 }
 
 function getNotifications($user_id, $limit = 10)
@@ -117,12 +118,13 @@ function getUserAvatar($userId)
     $avatar = $user['avatar'] ?? '';
     $username = $user['username'] ?? '';
 
-    // Check if avatar file exists
-    $server_path = $_SERVER['DOCUMENT_ROOT'] . '/uploads/avatars/' . $avatar;
-    $avatar_exists = !empty($avatar) && file_exists($server_path) && filesize($server_path) > 0;
+    // Resolve the uploaded avatar from the project’s uploads directory.
+    $uploadDir = __DIR__ . '/../uploads/avatars/';
+    $server_path = $uploadDir . $avatar;
+    $avatar_exists = !empty($avatar) && file_exists($server_path) && is_file($server_path) && filesize($server_path) > 0;
 
     if ($avatar_exists) {
-        $html = '<img src="' . SITE_URL . '/uploads/avatars/' . $avatar . '?v=' . filemtime($server_path) . '" 
+        $html = '<img src="' . SITE_URL . '/uploads/avatars/' . rawurlencode($avatar) . '?v=' . filemtime($server_path) . '" 
                      alt="' . htmlspecialchars($username) . '" 
                      class="avatar-img" 
                      loading="lazy"
@@ -179,7 +181,8 @@ function getDisplayName($name)
     return $first;
 }
 
-function getUserStatus($last_played) {
+function getUserGameStatus($last_played)
+{
     $diff = time() - strtotime($last_played);
 
     if ($diff < 300) {
@@ -191,18 +194,67 @@ function getUserStatus($last_played) {
     }
 }
 
-function getOnlineUsersCount($table_name) {
+function getOnlinePlayersByGame($game_name)
+{
     global $pdo;
 
-    $tableToSelect = ($table_name === 'click') ? 'click_data' : 'whack_scores';
-    
+    if ($game_name === "click") {
+        $tableToSelect = "click_data";
+    } else {
+        $tableToSelect = 'whack_scores';
+    }
+
     $stmt = $pdo->prepare("
         SELECT COUNT(*) AS online_count 
         FROM $tableToSelect
-        WHERE last_played > NOW() - INTERVAL 5 MINUTE
-    ");
+        WHERE last_played > NOW() - INTERVAL 1 MINUTE"
+    );
     $stmt->execute();
     $result = $stmt->fetch();
-    
+
     return $result['online_count'] ?? 0;
+}
+
+
+function getOnlineUsers() {
+    global $pdo;
+
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) AS online_count 
+        FROM users 
+        WHERE last_activity > NOW() - INTERVAL 1 MINUTE"
+    );
+    $stmt->execute();
+    $result = $stmt->fetch();
+
+    return $result['online_count'] ?? 0;
+}
+function formatNumber($amount, $type = 'coins', $use_prefix = true)
+{
+    $prefixes = [
+        'coins' => '💰',
+        'clicks' => '👆',
+        'damage' => '⚔️',
+        'health' => '❤️',
+        'defense' => '🛡️',
+        'xp' => '⭐',
+        'score' => '⭐',
+        'points' => '⭐',
+        'enemy' => '👾'
+    ];
+
+    $prefix = $prefixes[$type] ?? '';
+    $formatted = '';
+
+    if ($amount >= 1000000000) {
+        $formatted = number_format($amount / 1000000000, 1) . 'B';
+    } elseif ($amount >= 1000000) {
+        $formatted = number_format($amount / 1000000, 1) . 'M';
+    } elseif ($amount >= 1000) {
+        $formatted = number_format($amount / 1000, 1) . 'K';
+    } else {
+        $formatted = (string)$amount;
+    }
+
+    return ($use_prefix ? $prefix . ' ' : '') . $formatted;
 }

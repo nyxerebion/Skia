@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/../core/bootstrap.php';
 
-error_log('=== mark-notification-read.php called ===');
-error_log('Raw input: ' . file_get_contents('php://input'));
-
 header('Content-Type: application/json');
 
 if (!checkLogin()) {

@@ -1,6 +1,21 @@
 <?php
 // bootstrap.php
 
+use Dotenv\Dotenv;
+use Hashids\Hashids;
+
+$project_root = dirname(__DIR__);
+$autoload_path = $project_root . '/vendor/autoload.php';
+
+if (file_exists($autoload_path)) {
+    require_once $autoload_path;
+}
+
+if (file_exists($project_root . '/.env') && class_exists(Dotenv::class)) {
+    $dotenv = Dotenv::createImmutable($project_root);
+    $dotenv->safeLoad();
+}
+
 // 1. Session settings
 ini_set('session.cache_limiter', 'nocache');
 ini_set('session.cache_expire', '0');
@@ -8,16 +23,21 @@ ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
 
-// 2. Start output buffering to prevent header issues
+// 2. START SESSION HERE
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 3. Start output buffering to prevent header issues
 ob_start();
 
-// 3. Load connection (starts session)
+// 4. Load connection (database only, no session)
 require_once __DIR__ . '/../database/connection.php';
 
-// 4. Send headers immediately after session start, before any output
+// 5. Send headers immediately after session start, before any output
 require_once __DIR__ . '/../security/headers.php';
 
-// 5. Rest of includes
+// 6. Rest of includes
 global $pdo;
 require_once __DIR__ . '/../backend/auth-helpers.php';
 require_once __DIR__ . '/../backend/helpers.php';
@@ -31,8 +51,6 @@ require_once __DIR__ . '/../backend/config.php';
 $GLOBALS['icons'] = $icons;
 $GLOBALS['badge_labels'] = $badge_labels;
 
-// 6. Optional: flush headers but keep buffer for page output
-// ob_end_flush() called at end of each page script
 date_default_timezone_set('Asia/Manila');
 
 // Detect environment
@@ -47,3 +65,11 @@ if ($is_local) {
 require_once __DIR__ . '/../backend/config/click-functions.php';
 require_once __DIR__ . '/../backend/config/enemies.php';
 require_once __DIR__ . '/../backend/config/levels.php';
+
+require_once __DIR__ . '/../backend/config/whack-functions.php';
+
+$hashids = new Hashids($_ENV['HASHIDS_SALT'] ?? '');
+
+if (isset($_SESSION['user_id'])) {
+    updateUserActivity($_SESSION['user_id']);
+}

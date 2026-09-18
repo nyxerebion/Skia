@@ -6,7 +6,9 @@ if (!checkLogin()) {
     header('Location: ../index.php');
     exit;
 }
-$user_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+$hashed_id = $_GET['id'] ?? null;
+$user_id = decodeID($hashed_id);
 
 if (!$user_id) {
     setFlashMessage('User not specified.', 'error');
@@ -114,10 +116,25 @@ $user_following = $stmt->fetchColumn();
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                onclick="markRead(<?= $notif['id'] ?>, '<?= $notif['link'] ?>')">
+                                data-id="<?= $notif['id'] ?>"
+                                data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
                                 <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
                                 <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
-                                <div class="time"><?= timeAgo($notif['created_at']) ?></div>
+                                <div class="meta">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                        <?php
+                                        $senderLabels = [
+                                            'system' => '🤖 System',
+                                            'creator' => '👑 Creator',
+                                            'admin' => '🛡️ Admin',
+                                            'user' => '👤 User'
+                                        ];
+                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        ?>
+                                    </span>
+                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="time"><?= timeAgo($notif['created_at']) ?></span>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -140,13 +157,18 @@ $user_following = $stmt->fetchColumn();
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-                    <label>
-                        <input type="checkbox" id="darkMode" onclick="toggleTheme()"> Dark Mode
-                    </label>
+
+                    <div class="theme-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="other">
                     <h4>Other</h4>
-                    <a href="../security/logout.php" class="logout-btn" id="responsiveBtn">Logout</a>
+                    <a href="<?= SITE_URL ?>/pages/settings.php">Full Settings</a> <a href="../security/logout.php" class="logout-btn" id="responsiveBtn">Logout</a>
                 </div>
             </div>
         </div>
@@ -197,24 +219,60 @@ $user_following = $stmt->fetchColumn();
                     </svg></span>
                 <span class="name">Posts</span>
             </a>
+
+            <a href="../games/index.php" class="nav-link">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dice5-icon lucide-dice-5">
+                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        <path d="M16 8h.01" />
+                        <path d="M8 8h.01" />
+                        <path d="M8 16h.01" />
+                        <path d="M16 16h.01" />
+                        <path d="M12 12h.01" />
+                    </svg></span>
+                <span class="name">Games</span>
+            </a>
         </nav>
+
+
+        <div class="online-wrapper">
+            🟢 <span class="online-users">0</span> Online now
+            <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </span>
+
+            <div class="online-users-view" style="display: none;">
+                <div class="section-header">
+                    <h3>Online Users</h3>
+                    <span id="onlineUsersCount">(0)</span>
+                </div>
+
+                <div class="online-users-list" id="onlineUsersList">
+                    <!-- Online users will be populated here -->
+                </div>
+
+                <div class="bottom-wrapper">
+                    <p>Touch outside to close</p>
+                    <button onclick="closeOnlineUsers()">close</button>
+                </div>
+            </div>
+        </div>
 
         <div class="sidebar-profile">
             <a href="../pages/profile.php" class="profile-link">
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
+                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
                         <span class="profile-role"><?= htmlspecialchars($_SESSION['role'] ?? 'unknown') ?></span>
                     </div>
                 </div>
-                <span class="more-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                    </svg></span>
             </a>
         </div>
     </aside>
@@ -270,8 +328,8 @@ $user_following = $stmt->fetchColumn();
 
                 <button onclick="toggleFollow(<?= $profile_user['id'] ?>)"
                     data-user="<?= $profile_user['id'] ?>"
-                    class="btn-follow <?= $is_following ? 'following' : '' ?>">
-                    <?= $is_following ? '✔️ Following' : '➕ Follow' ?>
+                    class="follow-btn <?= $is_following ? 'following' : '' ?>">
+                    <?= $is_following ? 'Following' : 'Follow' ?>
                 </button>
             </section>
 

@@ -1,2 +1,0 @@
-# Skia
-Live sandbox

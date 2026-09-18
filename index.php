@@ -113,15 +113,30 @@ $top_points = $stmt->fetch();
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                onclick="markRead(<?= $notif['id'] ?>, '<?= $notif['link'] ?>')">
+                                onclick="markRead(<?= $notif['id'] ?>, '<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>')">
                                 <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
                                 <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
-                                <div class="time"><?= timeAgo($notif['created_at']) ?></div>
+                                <div class="meta">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                        <?php
+                                        $senderLabels = [
+                                            'system' => '🤖 System',
+                                            'creator' => '👑 Creator',
+                                            'admin' => '🛡️ Admin',
+                                            'user' => '👤 User'
+                                        ];
+                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        ?>
+                                    </span>
+                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="time"><?= timeAgo($notif['created_at']) ?></span>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
             </div>
+
             <button id="settingsBtn" onclick="toggleSettings()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
                     <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
@@ -138,17 +153,30 @@ $top_points = $stmt->fetch();
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-                    <label>
-                        <input type="checkbox" id="darkMode" onclick="toggleTheme()"> Dark Mode
-                    </label>
+
+                    <div class="theme-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="other">
                     <h4>Other</h4>
+                    <a href="<?= SITE_URL ?>/pages/settings.php">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
+                            <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg> Settings
+                    </a>
+
                     <a href="security/logout.php" id="responsiveBtn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out">
                             <path d="m16 17 5-5-5-5" />
                             <path d="M21 12H9" />
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        </svg> Logout</a>
+                        </svg> Logout
+                    </a>
                 </div>
             </div>
         </div>
@@ -180,6 +208,17 @@ $top_points = $stmt->fetch();
                             <circle cx="10" cy="7" r="4" />
                         </svg></span>
                     <span class="name">Admin</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if (isCreator()): ?>
+                <a href="creator/notifications.php" class="nav-link">
+                    <span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-star-icon lucide-user-star">
+                            <path d="M16.051 12.616a1 1 0 0 1 1.909.024l.737 1.452a1 1 0 0 0 .737.535l1.634.256a1 1 0 0 1 .588 1.806l-1.172 1.168a1 1 0 0 0-.282.866l.259 1.613a1 1 0 0 1-1.541 1.134l-1.465-.75a1 1 0 0 0-.912 0l-1.465.75a1 1 0 0 1-1.539-1.133l.258-1.613a1 1 0 0 0-.282-.866l-1.156-1.153a1 1 0 0 1 .572-1.822l1.633-.256a1 1 0 0 0 .737-.535z" />
+                            <path d="M8 15H7a4 4 0 0 0-4 4v2" />
+                            <circle cx="10" cy="7" r="4" />
+                        </svg></span>
+                    <span class="name">Creator</span>
                 </a>
             <?php endif; ?>
 
@@ -215,22 +254,46 @@ $top_points = $stmt->fetch();
             </a>
         </nav>
 
+        <div class="online-wrapper">
+            🟢 <span class="online-users">0</span> Online now
+            <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </span>
+
+            <div class="online-users-view" style="display: none;">
+                <div class="section-header">
+                    <h3>Online Users</h3>
+                    <span id="onlineUsersCount">(0)</span>
+                </div>
+
+                <div class="online-users-list" id="onlineUsersList">
+                    <!-- Online users will be populated here -->
+                </div>
+
+                <div class="bottom-wrapper">
+                    <p>Touch outside to close</p>
+                    <button onclick="closeOnlineUsers()">close</button>
+                </div>
+            </div>
+        </div>
+
         <div class="sidebar-profile">
             <a href="pages/profile.php" class="profile-link">
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
+                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
+
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
                         <span class="profile-role"><?= htmlspecialchars($_SESSION['role'] ?? 'unknown') ?></span>
                     </div>
                 </div>
-                <span class="more-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                    </svg></span>
             </a>
         </div>
     </aside>
@@ -261,8 +324,11 @@ $top_points = $stmt->fetch();
                 <?php foreach (array_slice($posts, 0, 5) as $post): ?>
                     <div class="post-preview">
                         <div class="post-preview-header">
-                            <a href="pages/view-profile.php?id=<?= $post['user_id'] ?>" class="user-link">
-                                <span class="avatar-container avatar-sm"><?= getUserAvatar($post['user_id']) ?></span>
+                            <a href="pages/view-profile.php?id=<?= encodeID($post['user_id']) ?>" class="user-link">
+                                <span class="avatar-container avatar-sm">
+                                    <?= getUserAvatar($post['user_id']) ?>
+                                    <div class="status status-offline" data-user="<?= $post['user_id'] ?>"></div>
+                                </span>
                                 <strong><?= htmlspecialchars($post['username']) ?></strong>
                             </a>
                             <span class="span-date post-preview-date"><?= timeAgo($post['created_at']) ?></span>
@@ -299,6 +365,7 @@ $top_points = $stmt->fetch();
                         <div class="user-item">
                             <span class="avatar-container avatar-sm">
                                 <?= getUserAvatar($user['id']) ?>
+                                <div class="status status-offline" data-user="<?= $user['id'] ?>"></div>
                             </span>
                             <div class="user-info">
                                 <span class="name"><?= htmlspecialchars($user['username']) ?></span>
@@ -336,7 +403,7 @@ $top_points = $stmt->fetch();
                         <span class="player"><?= htmlspecialchars($top_points['username']) ?></span>
                         <span class="value"><?= number_format($top_points['total_points']) ?></span>
                     </div>
-                <?php else: ?> 
+                <?php else: ?>
                     <div class="top-card empty">
                         <span class="label">No points yet</span>
                     </div>

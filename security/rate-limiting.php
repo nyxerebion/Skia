@@ -19,7 +19,13 @@ function checkRateLimit($pdo, $ip, $action, $maxAttempts = 5, $windowMinutes = 1
         $remaining = $windowMinutes - ((time() - strtotime($record['first_attempt'])) / 60);
         if ($remaining > 0) {
             http_response_code(429);
-            die("Too many attempts. Try again in " . ceil($remaining) . " minutes.");
+            header('Content-Type: application/json');
+            http_response_code(429);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Too many attempts. Try again in ' . ceil($remaining) . ' minutes.'
+            ]);
+            exit;
         }
         // Window expired, reset
         $stmt = $pdo->prepare("DELETE FROM rate_limits WHERE ip_address = ? AND action = ? AND archived = FALSE");

@@ -85,15 +85,15 @@ main {
     align-items: center;
 }
 
-.game-meta .status {
+.game-meta .game-status {
     font-weight: 600;
 }
 
-.game-meta .online {
+.game-meta .game-online {
     color: #22c55e;
 }
 
-.game-meta .offline {
+.game-meta .game-offline {
     color: #ef4444;
 }
 

@@ -92,28 +92,29 @@ function hideReviveModal() {
 }
 
 function revivePlayer() {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || "";
+  const csrfToken =
+    document.querySelector('meta[name="csrf-token"]')?.content || "";
 
-    fetch(API_URL + "/games/click-revive.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csrf_token: csrfToken }),
-    })
+  fetch(API_URL + "/games/click-revive.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ csrf_token: csrfToken }),
+  })
     .then((res) => res.json())
     .then((data) => {
-        if (data.success) {
-            updateStatsDisplay(data.stats);
-            updateXpBar(data.stats); // ✅ Force XP bar update
-            hideReviveModal();
-            toastMessage("💚 You have been revived!", "win");
-            healthCheck();
-        } else {
-            toastMessage(data.error || "Revive failed", "error");
-        }
+      if (data.success) {
+        updateStatsDisplay(data.stats);
+        updateXpBar(data.stats); // ✅ Force XP bar update
+        hideReviveModal();
+        toastMessage("💚 You have been revived!", "win");
+        healthCheck();
+      } else {
+        toastMessage(data.error || "Revive failed", "error");
+      }
     })
     .catch((err) => {
-        console.error("Revive error:", err);
-        toastMessage("Revive failed. Retrying...", "error");
+      console.error("Revive error:", err);
+      toastMessage("Revive failed. Retrying...", "error");
     });
 }
 
@@ -144,3 +145,45 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+
+function formatTime(seconds) {
+  if (!seconds || seconds < 0) return "0s";
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return hours + "h " + minutes + "m";
+  } else if (minutes > 0) {
+    return minutes + "m " + secs + "s";
+  }
+  return secs + "s";
+}
+
+function formatNumber(amount, type = "coins", use_prefix = true) {
+  const prefixes = {
+    coins: "💰",
+    clicks: "👆",
+    damage: "⚔️",
+    health: "❤️",
+    defense: "🛡️",
+    xp: "⭐",
+    enemy: "👾",
+  };
+
+  const prefix = prefixes[type] || "";
+  let formatted;
+
+  if (amount >= 1_000_000_000) {
+    formatted = (amount / 1_000_000_000).toFixed(1) + "B";
+  } else if (amount >= 1_000_000) {
+    formatted = (amount / 1_000_000).toFixed(1) + "M";
+  } else if (amount >= 1_000) {
+    formatted = (amount / 1_000).toFixed(1) + "K";
+  } else {
+    formatted = amount.toString();
+  }
+
+  return (use_prefix ? prefix + " " : "") + formatted;
+}

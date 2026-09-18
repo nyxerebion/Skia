@@ -1,0 +1,197 @@
+/* creator.css */
+
+/* Main Container */
+.creator-container {
+    max-width: 720px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.creator-container h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary, #fff);
+    margin-bottom: 6px;
+}
+
+.creator-container .subtitle {
+    color: var(--text-muted, #94a3b8);
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+/* Form */
+.creator-form {
+    background: var(--bg-secondary, #16213e);
+    border-radius: 16px;
+    padding: 28px 30px;
+    border: 1px solid var(--border-color, #2a3a5e);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.creator-form .form-group {
+    margin-bottom: 20px;
+}
+
+.creator-form label {
+    display: block;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-secondary, #cbd5e1);
+    margin-bottom: 6px;
+}
+
+.creator-form label .required {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+.creator-form input,
+.creator-form select,
+.creator-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--bg-primary, #1a1a2e);
+    border: 1px solid var(--border-color, #2a3a5e);
+    border-radius: 8px;
+    color: var(--text-primary, #fff);
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.creator-form input:focus,
+.creator-form select:focus,
+.creator-form textarea:focus {
+    outline: none;
+    border-color: var(--accent, #6C63FF);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+}
+
+.creator-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.creator-form select[multiple] {
+    min-height: 120px;
+}
+
+/* User Select Toggle */
+#user-select {
+    display: none;
+    margin-top: 10px;
+    padding: 12px;
+    background: var(--bg-primary, #1a1a2e);
+    border-radius: 8px;
+    border: 1px solid var(--border-color, #2a3a5e);
+}
+
+#user-select.show {
+    display: block;
+}
+
+/* Submit Button */
+.btn-send {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #6C63FF, #5a52e0);
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 6px;
+}
+
+.btn-send:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(108, 99, 255, 0.35);
+}
+
+.btn-send:active {
+    transform: translateY(0);
+}
+
+/* History */
+.history-section {
+    margin-top: 40px;
+}
+
+.history-section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    margin-bottom: 16px;
+}
+
+.history-item {
+    background: var(--bg-secondary, #16213e);
+    border-radius: 12px;
+    padding: 16px 20px;
+    border: 1px solid var(--border-color, #2a3a5e);
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+}
+
+.history-item:hover {
+    border-color: var(--accent, #6C63FF);
+}
+
+.history-item .h-title {
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    font-size: 15px;
+}
+
+.history-item .h-message {
+    color: var(--text-secondary, #cbd5e1);
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.history-item .h-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted, #64748b);
+}
+
+.history-item .h-meta .type-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(108, 99, 255, 0.15);
+    color: var(--accent, #6C63FF);
+}
+
+.history-item .h-meta .type-badge.game {
+    background: rgba(251, 191, 36, 0.15);
+    color: #f59e0b;
+}
+
+.history-item .h-meta .type-badge.success {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.history-item .h-meta .type-badge.warning {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .creator-form {
+        padding: 20px;
+    }
+
+    .creator-container h1 {
+        font-size: 22px;
+    }
+}

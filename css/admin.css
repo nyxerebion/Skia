@@ -117,7 +117,7 @@ main {
   background: var(--bg-body);
 }
 
-.role-badge {
+.admin-table tbody td .role-badge {
   padding: 2px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -125,17 +125,17 @@ main {
   text-transform: capitalize;
 }
 
-.role-badge.admin {
+.admin-table tbody td .role-badge.admin {
   background: #fef3c7;
   color: #92400e;
 }
 
-.role-badge.creator {
+.admin-table tbody td .role-badge.creator {
   background: #dbeafe;
   color: #1e40af;
 }
 
-.role-badge.user {
+.admin-table tbody td .role-badge.user {
   background: #e5e7eb;
   color: #374151;
 }
@@ -310,4 +310,97 @@ main {
 }
 .btn-cancel:hover {
   background: var(--border);
+}
+
+.user-bio {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: color 0.2s;
+}
+
+.user-bio:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+/* Bio Modal */
+.bio-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.bio-modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: modalFadeIn 0.2s ease;
+}
+
+.bio-modal h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    padding-right: 30px;
+}
+
+.bio-modal p {
+    margin: 0;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.bio-modal .close-modal {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: none;
+}
+
+.bio-modal .close-modal:hover {
+    background: var(--bg-body);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

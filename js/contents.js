@@ -66,3 +66,42 @@ function toggleUpdateLike(updateId) {
       alert("Error toggling like");
     });
 }
+
+function showBioModal(element) {
+    // Check if text is actually truncated
+    if (element.scrollWidth <= element.clientWidth) {
+        return; // No ellipsis, don't open modal
+    }
+
+    const bio = element.textContent.trim();
+    if (!bio) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "bio-modal-overlay";
+    overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.remove();
+    };
+
+    overlay.innerHTML = `
+        <div class="bio-modal">
+            <button class="close-modal" onclick="this.closest('.bio-modal-overlay').remove()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                </svg>
+            </button>
+            <h3>Bio</h3>
+            <p>${escapeHtml(bio)}</p>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+// Close on Escape key
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        const overlay = document.querySelector(".bio-modal-overlay");
+        if (overlay) overlay.remove();
+    }
+});

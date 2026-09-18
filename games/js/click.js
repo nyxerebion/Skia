@@ -1,4 +1,4 @@
-// click.js - SECURE VERSION
+// click.js - FULL VERSION
 let clicks,
   totalClicks,
   clickBuffer,
@@ -100,6 +100,10 @@ window.addEventListener("focus", () => {
   healthCheck();
 });
 
+// ============================================
+// UPDATE FUNCTIONS
+// ============================================
+
 function updateXpBar(stats) {
   const xpBar = document.getElementById("xpBar");
   const xpText = document.getElementById("xpText");
@@ -109,8 +113,6 @@ function updateXpBar(stats) {
   const xpRequired = stats?.xp_required ?? 0;
   const maxLevel = stats?.max_player_level ?? 14;
   const currentLevel = stats?.level ?? 1;
-
-  console.log("updateXpBar:", { currentXp, xpRequired, maxLevel, currentLevel });
 
   if (currentLevel >= maxLevel) {
     xpBar.style.width = "100%";
@@ -122,6 +124,126 @@ function updateXpBar(stats) {
   } else {
     xpBar.style.width = "0%";
     xpText.textContent = "0 / 0 XP";
+  }
+}
+
+function updateStatsPanels(stats) {
+  if (!stats || typeof stats !== "object") {
+    console.error("Invalid stats data:", stats);
+    return;
+  }
+
+  // 📊 STATS PANEL
+  const statElements = {
+    statDamage:
+      formatNumber(stats.damage ?? 0, "damage", true) +
+      " | " +
+      (stats.damage ?? 0),
+    statClickPower:
+      formatNumber(stats.click_power ?? 0, "clicks", true) +
+      " | " +
+      (stats.click_power ?? 0),
+    statMaxHealth:
+      formatNumber(stats.max_health ?? 100, "health", true) +
+      " | " +
+      (stats.max_health ?? 0),
+    statDefense:
+      formatNumber(stats.defense ?? 0, "defense", true) +
+      " | " +
+      (stats.defense ?? 0),
+    statCritChance: (stats.critical_chance ?? 0) + "%",
+    statCritMultiplier: (stats.critical_multiplier ?? 1.5) + "x",
+    statVampire: (stats.vampire ?? 0) + "%",
+    statSuperCrit: stats.super_crit_chance
+      ? stats.super_crit_chance + "%"
+      : "—",
+  };
+
+  Object.keys(statElements).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = statElements[id];
+  });
+
+  // 📈 HISTORY PANEL
+  const historyElements = {
+    currentCoins:
+      formatNumber(stats.coins ?? 0, "coins", true) +
+      " | " +
+      (stats.coins ?? 0),
+    totalCoinsEarned:
+      formatNumber(stats.total_coins ?? 0, "coins", true) +
+      " | " +
+      (stats.total_coins ?? 0),
+    totalCoinsSpent:
+      formatNumber(
+        (stats.total_coins ?? 0) - (stats.coins ?? 0),
+        "coins",
+        true,
+      ) +
+      " | " +
+      ((stats.total_coins ?? 0) - (stats.coins ?? 0)),
+    currentClicks:
+      formatNumber(stats.clicks ?? 0, "clicks", true) +
+      " | " +
+      (stats.clicks ?? 0),
+    totalClicksEarned:
+      formatNumber(stats.total_clicks ?? 0, "clicks", true) +
+      " | " +
+      (stats.total_clicks ?? 0),
+    totalClicksSpent:
+      formatNumber(
+        (stats.total_clicks ?? 0) - (stats.clicks ?? 0),
+        "clicks",
+        true,
+      ) +
+      " | " +
+      ((stats.total_clicks ?? 0) - (stats.clicks ?? 0)),
+  };
+
+  Object.keys(historyElements).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = historyElements[id];
+  });
+
+  // 🏆 ACHIEVES PANEL
+  const achieveElements = {
+    highestDamage:
+      formatNumber(stats.highest_damage ?? stats.damage ?? 0, "damage", true) +
+      " | " +
+      (stats.highest_damage ?? stats.damage ?? 0),
+    highestCrit: (stats.highest_crit ?? stats.critical_chance ?? 0) + "%",
+    enemiesDefeated: stats.kills ?? 0,
+    playTime: stats.time_played ? formatTime(stats.time_played) : "0s",
+  };
+
+  Object.keys(achieveElements).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = achieveElements[id];
+  });
+
+  // ⭐ LEVEL PANEL
+  const levelElements = {
+    playerLevel: stats.level ?? 1,
+    playerXP: stats.experience ?? 0,
+    playerXPMax: stats.xp_required ?? 100,
+    totalLevels: stats.max_player_level ?? 14,
+    reqXP: stats.xp_required ?? 100,
+  };
+
+  Object.keys(levelElements).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = levelElements[id];
+  });
+
+  // XP Bar
+  updateXpBar(stats);
+
+  // Next level bonus
+  const bonusEl = document.getElementById("nextLevelBonus");
+  if (bonusEl) {
+    const nextDmg = (stats.damage ?? 0) + 2;
+    const nextHP = (stats.max_health ?? 100) + 10;
+    bonusEl.textContent = `+${nextDmg} dmg, +${nextHP} HP`;
   }
 }
 
@@ -166,21 +288,19 @@ function updateStatsDisplay(stats) {
 
   if (el("playerHealth")) el("playerHealth").textContent = health;
   if (el("playerMaxHealth")) el("playerMaxHealth").textContent = maxHealth;
-  if (el("playerDefense")) el("playerDefense").textContent = defense;
-  if (el("playerDamage")) el("playerDamage").textContent = damage;
+  if (el("playerDefense")) el("playerDefense").textContent = formatNumber(defense, 'defense');
+  if (el("playerDamage")) el("playerDamage").textContent = formatNumber(damage, 'damage');
   if (el("clickPower")) el("clickPower").textContent = clickPower;
   if (el("playerCritChance")) el("playerCritChance").textContent = critChance;
   if (el("playerCritMultiplier"))
     el("playerCritMultiplier").textContent = critMultiplier;
   if (el("playerLevel")) el("playerLevel").textContent = level;
-  if (el("clicksCount")) el("clicksCount").textContent = clicks;
-  if (el("totalClicksCount")) el("totalClicksCount").textContent = totalClicks;
-  if (el("coinsCount")) el("coinsCount").textContent = coins;
-  if (el("totalCoinsCount")) el("totalCoinsCount").textContent = totalCoins;
+  if (el("clicksCount")) el("clicksCount").textContent = formatNumber(clicks, 'clicks', false);
+  if (el("coinsCount")) el("coinsCount").textContent = formatNumber(coins, 'coins', false);
   if (el("enemyHealth")) el("enemyHealth").textContent = enemyHealth;
   if (el("enemyMaxHealth")) el("enemyMaxHealth").textContent = enemyMaxHealth;
-  if (el("enemyDamage")) el("enemyDamage").textContent = enemyDamage;
-  if (el("enemyDefense")) el("enemyDefense").textContent = enemyDefense;
+  if (el("enemyDamage")) el("enemyDamage").textContent = formatNumber(enemyDamage, 'enemy', true);
+  if (el("enemyDefense")) el("enemyDefense").textContent = formatNumber(enemyDefense, 'defense', true);
   if (el("enemyCritChance"))
     el("enemyCritChance").textContent = enemyCritChance;
   if (el("enemyCritMultiplier"))
@@ -209,8 +329,13 @@ function updateStatsDisplay(stats) {
   if (el("enemyHealthBar"))
     el("enemyHealthBar").style.width = enemyHealthPercent + "%";
 
-  updateXpBar(stats);
+  // Update panels (this already calls updateXpBar)
+  updateStatsPanels(stats);
 }
+
+// ============================================
+// LOAD STATS
+// ============================================
 
 function loadStats(retryCount = 0) {
   const csrfToken =
@@ -273,6 +398,10 @@ function healthCheck() {
     .catch((err) => console.error("Health check error:", err));
 }
 
+// ============================================
+// ATTACK & CLICK
+// ============================================
+
 function handleAttack() {
   if (enemyHealth <= 0) {
     toastMessage("Enemy already dead! Loading next...", "info");
@@ -312,7 +441,6 @@ function handleAttack() {
       if (data.success) {
         updateStatsDisplay(data.stats);
 
-        // ✅ Special item messages
         // Vampire heal
         if (data.vampire_heal && data.vampire_heal > 0) {
           addCombatEffect("player", "vampire", `+${data.vampire_heal} HP`);
@@ -335,20 +463,17 @@ function handleAttack() {
           addCombatEffect("enemy", "enemy", `Defeated! +${reward} coins`);
           addActionMessage(`Enemy defeated! +${reward} coins`, "reward");
 
-          // XP Boost message
           if (data.xp_gain) {
             const xpText = data.xp_boost_active ? ` (Boosted)` : ``;
             addCombatEffect("player", "xp", `+${data.xp_gain} XP${xpText}`);
             addActionMessage(`📈 +${data.xp_gain} XP${xpText}`, "xp");
           }
 
-          // Double Level Up message
           if (data.double_level_triggered) {
             addCombatEffect("player", "levelup", "Double Level!");
             addActionMessage(`⬆️ Double Level Up!`, "levelup");
           }
 
-          // Force XP bar update
           updateXpBar(data.stats);
 
           const enemyCard = document.querySelector(".enemy-card");
@@ -360,14 +485,12 @@ function handleAttack() {
           const playerDefense = data.player_defense || 0;
           const enemyDefenseBlocked = data.enemy_defense_blocked || 0;
 
-          // Player damage effect (enemy takes damage)
           if (data.crit) {
             addCombatEffect("enemy", "crit", `CRIT! -${data.damage} HP`);
           } else {
             addCombatEffect("enemy", "damage", `-${data.damage} HP`);
           }
 
-          // Enemy defense message
           if (enemyDefenseBlocked > 0) {
             addCombatEffect(
               "enemy",
@@ -380,7 +503,6 @@ function handleAttack() {
             );
           }
 
-          // Enemy damage effect with defense messages
           if (data.enemy_crit && damageDealt > 0) {
             addCombatEffect("player", "crit", `Enemy CRIT! -${damageDealt} HP`);
             addActionMessage(`Enemy CRIT! -${damageDealt} HP`, "enemy-crit");
@@ -472,6 +594,10 @@ function handleClick() {
       clickBtn.textContent = "👆 CLICK";
     });
 }
+
+// ============================================
+// TIME SAVING
+// ============================================
 
 function saveTime() {
   timeBuffer++;

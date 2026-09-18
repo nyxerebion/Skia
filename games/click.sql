@@ -53,3 +53,6 @@ CREATE TABLE click_data (
 -- ALTER TABLE click_data ADD time_played INT DEFAULT 0 AFTER enemy_xp;
 
 -- ALTER TABLE click_data ADD COLUMN shop_upgrades JSON DEFAULT NULL AFTER items_json;
+
+ALTER TABLE click_data ADD COLUMN highest_damage INT UNSIGNED DEFAULT 0 AFTER deaths;
+ALTER TABLE click_data ADD COLUMN highest_crit INT UNSIGNED DEFAULT 0 AFTER highest_damage;

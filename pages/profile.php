@@ -7,42 +7,6 @@ if (!checkLogin()) {
     exit;
 }
 
-// Handle profile update
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    validateCSRFToken($_POST['csrf_token'] ?? '');
-
-    $name = sanitizeString($_POST['name'] ?? '');
-    $bio = sanitizeTextarea($_POST['bio'] ?? '');
-
-    $name = preg_replace('/\s+/', ' ', $name);
-
-    if (!preg_match('/^[a-zA-Z0-9. ]+$/', $name)) {
-        setFlashMessage('Invalid characters in name', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    if (substr_count($name, ' ') > 1) {
-        setFlashMessage('Name can only have one space', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    if (strlen($name) > 20) {
-        setFlashMessage('Name too long (max 20 characters)', 'error');
-        header('Location: profile.php');
-        exit;
-    }
-
-    $stmt = $pdo->prepare("UPDATE users SET name = ?, bio = ? WHERE id = ?");
-    $stmt->execute([$name, $bio, $_SESSION['user_id']]);
-
-    $_SESSION['name'] = $name;
-    setFlashMessage('Profile updated successfully!', 'success');
-    header('Location: profile.php');
-    exit;
-}
-
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $current_user = $stmt->fetch();
@@ -83,11 +47,14 @@ $stmt = $pdo->prepare("SELECT COUNT(follower_id) FROM follows WHERE follower_id 
 $stmt->execute([$current_user['id']]);
 $user_following = $stmt->fetchColumn();
 
-$edit_mode = isset($_GET['edit']);
 
-$stmt = $pdo->prepare("SELECT score, points, total_points, time_played FROM whack_scores WHERE user_id = ?");
+$stmt = $pdo->prepare("SELECT * FROM whack_scores WHERE user_id = ?");
 $stmt->execute([$current_user['id']]);
 $user_whack_data = $stmt->fetch();
+
+$stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
+$stmt->execute([$current_user['id']]);
+$user_click_data = $stmt->fetch();
 
 $stmt = $pdo->prepare("
     SELECT l.*, p.content AS post_content, p.id AS post_id, u.username
@@ -129,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
 
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    
+
     if (!in_array($extension, $allowed)) {
         setFlashMessage('Invalid file type. Only JPG, PNG, GIF, and WEBP allowed.', 'error');
         header('Location: profile.php');
@@ -137,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
     }
 
     $uploaded = false;
-    
+
     if ($extension === 'webp') {
         $image = @imagecreatefromwebp($file['tmp_name']);
         if ($image === false) {
@@ -230,10 +197,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                onclick="markRead(<?= $notif['id'] ?>, '<?= $notif['link'] ?>')">
+                                data-id="<?= $notif['id'] ?>"
+                                data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
                                 <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
                                 <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
-                                <div class="time"><?= timeAgo($notif['created_at']) ?></div>
+                                <div class="meta">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                        <?php
+                                        $senderLabels = [
+                                            'system' => '🤖 System',
+                                            'creator' => '👑 Creator',
+                                            'admin' => '🛡️ Admin',
+                                            'user' => '👤 User'
+                                        ];
+                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        ?>
+                                    </span>
+                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="time"><?= timeAgo($notif['created_at']) ?></span>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -256,13 +238,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-                    <label>
-                        <input type="checkbox" id="darkMode" onclick="toggleTheme()"> Dark Mode
-                    </label>
+
+                    <div class="theme-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="other">
                     <h4>Other</h4>
-                    <a href="../security/logout.php" class="logout-btn" id="responsiveBtn">Logout</a>
+                    <a href="<?= SITE_URL ?>/pages/settings.php"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
+                            <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg> Settings</a> <a href="../security/logout.php" class="logout-btn" id="responsiveBtn">Logout</a>
                 </div>
             </div>
         </div>
@@ -313,24 +303,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                     </svg></span>
                 <span class="name">Posts</span>
             </a>
+
+            <a href="../games/index.php" class="nav-link">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dice5-icon lucide-dice-5">
+                        <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                        <path d="M16 8h.01" />
+                        <path d="M8 8h.01" />
+                        <path d="M8 16h.01" />
+                        <path d="M16 16h.01" />
+                        <path d="M12 12h.01" />
+                    </svg></span>
+                <span class="name">Games</span>
+            </a>
         </nav>
+
+
+        <div class="online-wrapper">
+            🟢 <span class="online-users">0</span> Online now
+            <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </span>
+
+            <div class="online-users-view" style="display: none;">
+                <div class="section-header">
+                    <h3>Online Users</h3>
+                    <span id="onlineUsersCount">(0)</span>
+                </div>
+
+                <div class="online-users-list" id="onlineUsersList">
+                    <!-- Online users will be populated here -->
+                </div>
+
+                <div class="bottom-wrapper">
+                    <p>Touch outside to close</p>
+                    <button onclick="closeOnlineUsers()">close</button>
+                </div>
+            </div>
+        </div>
 
         <div class="sidebar-profile">
             <a href="../pages/profile.php" class="profile-link">
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
+                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
                         <span class="profile-role"><?= htmlspecialchars($_SESSION['role'] ?? 'unknown') ?></span>
                     </div>
                 </div>
-                <span class="more-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                    </svg></span>
             </a>
         </div>
     </aside>
@@ -349,6 +375,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
             <section class="profile-section">
                 <div class="profile-avatar">
                     <?= getUserAvatar($_SESSION['user_id']) ?>
+                    <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
+
+
                 </div>
 
                 <div class="profile-info-container">
@@ -376,48 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
 
                     <span class="user-bio"><?= htmlspecialchars(!empty($current_user['bio']) ? $current_user['bio'] : 'no bio yet...') ?></span>
                 </div>
-
-                <div class="profile-controls">
-                    <a href="?edit=1" class="link edit-link">✏️ Edit Profile</a>
-                </div>
             </section>
-
-            <?php if ($edit_mode): ?>
-                <section class="edit-form-section">
-                    <h2>✏️ Edit Profile</h2>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= getCSRFToken() ?>">
-                        <input type="hidden" name="update_profile" value="1">
-
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" value="<?= htmlspecialchars($current_user['username']) ?>" disabled>
-                            <small>Username cannot be changed</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="text" value="<?= htmlspecialchars($current_user['email']) ?>" disabled>
-                            <small>Email cannot be changed</small>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Display Name</label>
-                            <input type="text" name="name" value="<?= htmlspecialchars($current_user['name'] ?? '') ?>" placeholder="Your display name" maxlength="20" pattern="[a-zA-Z0-9. ]+" title="Letters, numbers, dots, and 1 space only">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Bio</label>
-                            <textarea name="bio" rows="3" placeholder="Tell us about yourself"><?= htmlspecialchars($current_user['bio'] ?? '') ?></textarea>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-save">💾 Save Changes</button>
-                            <a href="profile.php" class="btn-cancel">Cancel</a>
-                        </div>
-                    </form>
-                </section>
-            <?php endif; ?>
 
             <!-- Avatar Upload with Crop -->
             <section class="avatar-section">
@@ -459,7 +447,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                 </div>
             </section>
 
-            <section class="whack-data-section">
+            <section class="data-section">
                 <h3>Whack Game Stats</h3>
 
                 <div class="stats">
@@ -501,6 +489,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                 </div>
             </section>
 
+            <section class="data-section">
+                <h3>Click Game Stats</h3>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars($user_click_data['total_clicks'] ?? 0) ?>
+                        </div>
+                        <div class="stat-label">
+                            Total Clicks
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars($user_click_data['total_coins'] ?? 0) ?>
+                        </div>
+                        <div class="stat-label">
+                            Total Coins
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars($user_click_data['clicks'] ?? 0) ?>
+                        </div>
+                        <div class="stat-label">
+                            Clicks
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars($user_click_data['coins'] ?? 0) ?>
+                        </div>
+                        <div class="stat-label">
+                            Coins
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars($user_click_data['kills'] ?? 0) ?>
+                        </div>
+                        <div class="stat-label">
+                            Kills
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-number">
+                            <?= htmlspecialchars(formatTime($user_click_data['time_played'] ?? 0)) ?>
+                        </div>
+                        <div class="stat-label">
+                            Play Time
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <?php if (!empty($user_posts)): ?>
                 <div class="posts-section">
                     <h3>Your Posts</h3>
@@ -517,8 +565,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                                 </div>
 
                                 <div class="link">
-                                    <a href="../posts/index.php?scroll_to=<?= $post['id'] ?>" class="view-link">View Post →</a>
-                                    <a href="../posts/edit.php?id=<?= $post['id'] ?>" class="edit-link">Edit Post →</a>
+                                    <a href="../posts/index.php?scroll_to=<?= encodeID($post['id']) ?>" class="view-link">View Post →</a>
+                                    <a href="../posts/edit.php?id=<?= encodeID($post['id']) ?>" class="edit-link">Edit Post →</a>
                                 </div>
                             </div>
                         </div>
@@ -549,7 +597,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
                                 <span class="liked-date"><?= timeAgo($like['created_at']) ?></span>
                             </div>
                             <p><?= nl2br(htmlspecialchars(substr($like['post_content'], 0, 150))) ?></p>
-                            <a href="../posts/index.php?scroll_to=<?= $like['post_id'] ?>" class="view-link">View Post →</a>
+                            <a href="../posts/index.php?scroll_to=<?= encodeID($like['post_id']) ?>" class="view-link">View Post →</a>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>

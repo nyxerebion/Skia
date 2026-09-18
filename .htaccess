@@ -1,0 +1,2 @@
+# Custom 404 Not Found Error Page
+ErrorDocument 404 https://profreehost.com/404/index.php

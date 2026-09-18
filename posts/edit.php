@@ -7,7 +7,8 @@ if (!checkLogin()) {
     exit;
 }
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$hash = isset($_GET['id']) ? decodeID($_GET['id']) : '';
+$id = $hash ?: 0;
 
 // Get post with username
 $stmt = $pdo->prepare("

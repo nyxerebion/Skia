@@ -9,7 +9,7 @@ if (!checkLogin()) {
 }
 
 $user_id = $_SESSION['user_id'];
-$player = getPlayer($user_id);
+$player = getClickPlayer($user_id);
 
 $defaultStats = [
     'health' => 100,
@@ -43,6 +43,8 @@ $stats['max_enemy_level'] = getMaxEnemyLevel();
 $stats['max_player_level'] = getMaxPlayerLevel();
 $nextLevel = min($player['level'] + 1, getMaxPlayerLevel());
 $stats['xp_required'] = ($player['level'] >= getMaxPlayerLevel()) ? 0 : getLevelXpRequired($nextLevel);
+
+
 
 echo json_encode([
     'success' => true,

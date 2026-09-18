@@ -13,7 +13,7 @@ $csrf_token = $input['csrf_token'] ?? '';
 validateCSRFToken($csrf_token);
 
 $user_id = $_SESSION['user_id'];
-$player = getPlayer($user_id);
+$player = getClickPlayer($user_id);
 
 // Load shop upgrades for special items
 $upgrades = json_decode($player['shop_upgrades'] ?? '{}', true);
@@ -74,11 +74,7 @@ if ($player['health'] <= 0) {
     $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $stats = $stmt->fetch();
-    $stats['max_enemy_level'] = getMaxEnemyLevel();
-    $stats['max_player_level'] = getMaxPlayerLevel();
-    $stats['experience'] = $stats['experience'] ?? 0;
-    $stats['level'] = $stats['level'] ?? 1;
-    $stats['xp_required'] = getLevelXpRequired(min($stats['level'] + 1, getMaxPlayerLevel()));
+    $stats = enrichClickStats($stats);
 
     echo json_encode([
         'success' => true,
@@ -103,7 +99,7 @@ if ($newEnemyHealth <= 0) {
     $xpBoostLevel = $upgrades[17] ?? 0;
     $xpMultiplier = 1 + ($xpBoostLevel * 0.25);
     $xpGain = floor(($enemy['xp'] ?? 10) * $xpMultiplier);
-    
+
     $newExp = $player['experience'] + $xpGain;
     $newLevel = getLevelByXp($newExp);
     $maxPlayerLevel = getMaxPlayerLevel();
@@ -198,11 +194,7 @@ if ($newEnemyHealth <= 0) {
     $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $stats = $stmt->fetch();
-    $stats['max_enemy_level'] = getMaxEnemyLevel();
-    $stats['max_player_level'] = $maxPlayerLevel;
-    $stats['experience'] = $stats['experience'] ?? 0;
-    $stats['level'] = $stats['level'] ?? 1;
-    $stats['xp_required'] = getLevelXpRequired(min($stats['level'] + 1, $maxPlayerLevel));
+    $stats = enrichClickStats($stats);
 
     echo json_encode([
         'success' => true,
@@ -249,11 +241,7 @@ $stmt->execute([
 $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $stats = $stmt->fetch();
-$stats['max_enemy_level'] = getMaxEnemyLevel();
-$stats['max_player_level'] = getMaxPlayerLevel();
-$stats['experience'] = $stats['experience'] ?? 0;
-$stats['level'] = $stats['level'] ?? 1;
-$stats['xp_required'] = getLevelXpRequired(min($stats['level'] + 1, getMaxPlayerLevel()));
+$stats = enrichClickStats($stats);
 
 echo json_encode([
     'success' => true,

@@ -4,7 +4,8 @@ CREATE TABLE whack_scores (
     score INT DEFAULT 0,
     points INT DEFAULT 0,
     total_points INT DEFAULT 0,
-    time_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    time_played INT DEFAULT 0,
+    last_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY unique_user (user_id),
     INDEX idx_user_score (score),
     INDEX idx_user_total_points (total_points),
@@ -27,3 +28,7 @@ ALTER TABLE whack_scores DROP COLUMN played_at;
 
 ALTER TABLE whack_scores 
 ADD COLUMN time_played INT DEFAULT 0 AFTER total_points;
+
+ALTER TABLE whack_scores ADD COLUMN last_played TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER time_played;
+
+ALTER TABLE whack_scores ADD COLUMN shop_upgrades JSON DEFAULT NULL AFTER total_points;

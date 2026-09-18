@@ -68,14 +68,22 @@ $top_points = $stmt->fetch();
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-                    <label>
-                        <input type="checkbox" id="darkMode" onclick="toggleTheme()"> Dark Mode
-                    </label>
+
+                    <div class="theme-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="other">
                     <h4>Other</h4>
-                    <label>
-                        Soon..
+                    <a href="<?= SITE_URL ?>/pages/settings.php"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
+                            <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg> Settings</a> <label>
+
                     </label>
                 </div>
             </div>
@@ -120,6 +128,34 @@ $top_points = $stmt->fetch();
                 <span class="name">About</span>
             </a>
         </nav>
+
+        <div class="online-wrapper">
+            🟢 <span class="online-users">0</span> Online now
+            <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </span>
+
+            <div class="online-users-view" style="display: none;">
+                <div class="section-header">
+                    <h3>Online Users</h3>
+                    <span id="onlineUsersCount">(0)</span>
+                </div>
+
+                <div class="online-users-list" id="onlineUsersList">
+                    <!-- Online users will be populated here -->
+                </div>
+
+                <div class="bottom-wrapper">
+                    <p>Touch outside to close</p>
+                    <button onclick="closeOnlineUsers()">close</button>
+                </div>
+            </div>
+        </div>
+
         <div class="sidebar-profile">
             <div class="get-started-actions">
                 <a href="security/login.php" class="btn-secondary">Log in →</a>

@@ -14,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-$post_id = (int)($input['id'] ?? 0);
+$hash = decodeID($input['id'] ?? '');
+$post_id = (int)($hash ?: 0);
 $csrf_token = $input['csrf_token'] ?? '';
 
 validateCSRFToken($csrf_token);
@@ -50,7 +51,9 @@ if ($exists) {
             'info',
             '❤️ New Like',
             $liker['username'] . ' liked your post.',
-            SITE_URL . '/posts/index.php?scroll_to=' . $post_id
+            SITE_URL . '/posts/index.php?scroll_to=' . encodeID($post_id),
+            'user',
+            $_SESSION['user_id']
         );
     }
 }

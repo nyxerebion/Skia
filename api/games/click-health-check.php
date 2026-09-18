@@ -9,7 +9,7 @@ if (!checkLogin()) {
 }
 
 $user_id = $_SESSION['user_id'];
-$player = getPlayer($user_id);
+$player = getClickPlayer($user_id);
 
 // ✅ Check if player is dead
 if ($player['health'] <= 0) {
@@ -82,9 +82,7 @@ if ($player['enemy_health'] <= 0) {
 $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $stats = $stmt->fetch();
-$stats['max_enemy_level'] = getMaxEnemyLevel();
-$stats['xp_required'] = getLevelXpRequired(min($stats['level'] + 1, getMaxPlayerLevel()));
-$stats['max_player_level'] = getMaxPlayerLevel();
+$stats = enrichClickStats($stats);
 
 echo json_encode([
     'success' => true,

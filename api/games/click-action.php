@@ -13,7 +13,7 @@ $csrf_token = $input['csrf_token'] ?? '';
 validateCSRFToken($csrf_token);
 
 $user_id = $_SESSION['user_id'];
-$player = getPlayer($user_id);
+$player = getClickPlayer($user_id);
 $clickPower = $player['click_power'] ?? 1;
 
 // Update clicks
@@ -31,6 +31,7 @@ $stmt->execute([$newClicks, $newTotalClicks, $user_id]);
 $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
 $stmt->execute([$user_id]);
 $stats = $stmt->fetch();
+$stats = enrichClickStats($stats);
 
 // ✅ Always return stats
 echo json_encode([

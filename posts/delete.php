@@ -7,7 +7,8 @@ if (!checkLogin()) {
     exit;
 }
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$hashed_id = $_GET['id'] ?? null;
+$post_id = decodeID($hashed_id);
 
 // Get post
 $stmt = $pdo->prepare(
@@ -17,7 +18,7 @@ $stmt = $pdo->prepare(
     JOIN users u ON p.user_id = u.id
     WHERE p.id = ?"
 );
-$stmt->execute([$id]);
+$stmt->execute([$post_id]);
 $post = $stmt->fetch();
 
 if (!$post) {
@@ -39,13 +40,13 @@ if (!$is_owner && !$is_admin) {
 if ($is_admin && !$is_owner && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_post'])) {
     validateCSRFToken($_POST['csrf_token'] ?? '');
 
-    $data = json_encode(['post_id' => $id]);
+    $data = json_encode(['post_id' => $post_id]);
 
     $stmt = $pdo->prepare("
         INSERT INTO pending_actions (admin_id, action_type, target_type, target_id, data)
         VALUES (?, 'delete_post', 'post', ?, ?)
     ");
-    $stmt->execute([$_SESSION['user_id'], $id, $data]);
+    $stmt->execute([$_SESSION['user_id'], $post_id, $data]);
 
     setFlashMessage('Delete request sent to creator for approval.', 'info');
     header('Location: index.php');
@@ -63,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_post']) && $is
             archived_by = ?
         WHERE id = ?
     ");
-    $stmt->execute([date('Y-m-d H:i:s'), $_SESSION['user_id'], $id]);
+    $stmt->execute([date('Y-m-d H:i:s'), $_SESSION['user_id'], $post_id]);
 
     setFlashMessage('Post deleted!', 'success');
     header('Location: index.php');

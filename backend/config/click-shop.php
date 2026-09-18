@@ -322,17 +322,6 @@ function getItemCost($item, $owned) {
     ];
 }
 
-function getShopSections() {
-    return [
-        'ATTACK' => ['damage'],
-        'CLICKS' => ['click'],
-        'HEALTH' => ['health', 'heal', 'vampire'],
-        'CRITICAL' => ['critChance', 'critMultiplier', 'critTap'],
-        'DEFENSE' => ['defense', 'defenseMultiplier', 'penetrationResist'],
-        'BOOSTS' => ['xpBoost', 'doubleLevel']
-    ];
-}
-
 function getItemIcon($type) {
     $icons = [
         'damage' => '⚔️',
@@ -351,4 +340,16 @@ function getItemIcon($type) {
         'trueDamageBlock' => '🛡️'
     ];
     return $icons[$type] ?? '📦';
+}
+
+function getShopSections()
+{
+    return [
+        'ATTACK' => ['damage'],
+        'CLICKS' => ['click'],
+        'HEALTH' => ['health', 'heal', 'vampire'],
+        'CRITICAL' => ['critChance', 'critMultiplier', 'critTap'],
+        'DEFENSE' => ['defense', 'defenseMultiplier', 'penetrationResist'],
+        'BOOSTS' => ['xpBoost', 'doubleLevel']
+    ];
 }

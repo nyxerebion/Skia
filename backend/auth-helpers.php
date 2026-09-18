@@ -30,3 +30,15 @@ function isAdmin()
 function isCreator() {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'creator';
 }
+
+function updateUserActivity($user_id)
+{
+    global $pdo;
+
+    $stmt = $pdo->prepare("
+        UPDATE users 
+        SET last_activity = NOW() 
+        WHERE id = ?
+    ");
+    $stmt->execute([$user_id]);
+}

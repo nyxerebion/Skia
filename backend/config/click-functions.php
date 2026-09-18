@@ -1,6 +1,6 @@
 <?php
 
-function getPlayer($user_id)
+function getClickPlayer($user_id)
 {
     global $pdo;
 
@@ -82,11 +82,11 @@ function getPlayer($user_id)
     $level = $player['level'] ?? 1;
     $upgrades = json_decode($player['shop_upgrades'] ?? '{}', true);
     $bonusApplied = $upgrades['_level_bonus'] ?? 0;
-    
+
     if ($level > $bonusApplied) {
         $totalDamageBonus = 0;
         $totalHealthBonus = 0;
-        
+
         for ($i = $bonusApplied + 1; $i <= $level; $i++) {
             $levelData = getLevelData()[$i] ?? null;
             if ($levelData) {
@@ -94,7 +94,7 @@ function getPlayer($user_id)
                 $totalHealthBonus += $levelData['healthBonus'] ?? 0;
             }
         }
-        
+
         if ($totalDamageBonus > 0 || $totalHealthBonus > 0) {
             $stmt = $pdo->prepare("
                 UPDATE click_data 
@@ -104,7 +104,7 @@ function getPlayer($user_id)
                 WHERE user_id = ?
             ");
             $stmt->execute([$totalDamageBonus, $totalHealthBonus, $totalHealthBonus, $user_id]);
-            
+
             // Mark as applied
             $upgrades['_level_bonus'] = $level;
             $stmt = $pdo->prepare("UPDATE click_data SET shop_upgrades = ? WHERE user_id = ?");
@@ -117,11 +117,23 @@ function getPlayer($user_id)
         $stmt = $pdo->prepare("UPDATE click_data SET level = ? WHERE user_id = ?");
         $stmt->execute([$maxPlayerLevel, $user_id]);
     }
-    
+
     // Re-fetch updated player and return
     $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
     $stmt->execute([$user_id]);
     $player = $stmt->fetch();
 
     return $player;
+}
+
+function enrichClickStats($stats)
+{
+    $stats['max_enemy_level'] = getMaxEnemyLevel();
+    $stats['max_player_level'] = getMaxPlayerLevel();
+    $stats['experience'] = $stats['experience'] ?? 0;
+    $stats['level'] = $stats['level'] ?? 1;
+    $stats['xp_required'] = getLevelXpRequired(min($stats['level'] + 1, getMaxPlayerLevel()));
+    $stats['time_played'] = $stats['time_played'] ?? 0;
+
+    return $stats;
 }

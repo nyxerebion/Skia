@@ -1,0 +1,347 @@
+/* Updates page specific styles */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.updates-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.updates-container .section-header {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.updates-container .section-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.updates-container .section-header span {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-right: 10px;
+  color: var(--text-primary);
+}
+
+.new-link {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.new-link:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* Update Card */
+.update-card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  border-left: 4px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.update-card:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.update-card.feature { border-left-color: #3b82f6; }
+.update-card.fix { border-left-color: #ef4444; }
+.update-card.security { border-left-color: #8b5cf6; }
+.update-card.tweak { border-left-color: #22c55e; }
+.update-card.patch { border-left-color: #f59e0b; }
+.update-card.improvement { border-left-color: #06b6d4; }
+
+.update-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.update-badge {
+  display: flex;
+  padding: 2px 12px;
+  border-radius: var(--radius);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.update-badge.feature { background: #dbeafe; color: #1d4ed8; }
+.update-badge.fix { background: #fee2e2; color: #dc2626; }
+.update-badge.security { background: #ede9fe; color: #7c3aed; }
+.update-badge.tweak { background: #dcfce7; color: #16a34a; }
+.update-badge.patch { background: #fef3c7; color: #d97706; }
+.update-badge.improvement { background: #cffafe; color: #0891b2; }
+
+.update-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 6px 0 8px 0;
+  color: var(--text-primary);
+}
+
+.update-content {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 8px 0 12px 0;
+  word-wrap: break-word;
+}
+
+.update-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.update-author {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.dot {
+  font-size: 1.1rem;
+}
+
+.update-new {
+  background: #ef4444;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.edit-link {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 40px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.7rem;
+  transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.edit-link:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Update Actions - FIXED (single definition) */
+.update-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.update-actions .btn-edit {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 4px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.update-actions .btn-edit:hover {
+  background: #bfdbfe;
+}
+
+/* Like button inside update */
+.update-actions .like-btn {
+  color: var(--text-secondary);
+  font-weight: 700;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: none;
+}
+
+.update-actions .like-btn:hover {
+  transform: scale(1.05);
+  background: var(--bg-body);
+  box-shadow: none;
+}
+
+.update-actions .like-btn.liked {
+  color: #ef4444;
+}
+
+.update-actions .like-btn.liked:hover {
+  background: #fee2e2;
+}
+
+.update-likes {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Edit Section */
+.edit-section {
+  background: var(--bg-sidebar);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.edit-section h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.edit-section .form-group {
+  margin-bottom: 14px;
+}
+
+.edit-section input[type="text"],
+.edit-section textarea,
+.edit-section select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  transition: border 0.2s;
+}
+
+.edit-section input[type="text"]:focus,
+.edit-section textarea:focus,
+.edit-section select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.edit-section textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.edit-section .form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.edit-section .btn-save {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-section .btn-save:hover {
+  background: var(--accent-hover);
+}
+
+.edit-section .btn-cancel {
+  background: var(--text-muted);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.edit-section .btn-cancel:hover {
+  background: var(--text-secondary);
+}
+
+/* Mobile */
+@media (max-width: 576px) {
+  .updates-container {
+    padding: 12px;
+  }
+
+  .update-card {
+    padding: 14px 16px;
+  }
+
+  .update-title {
+    font-size: 1rem;
+  }
+
+  .update-content {
+    font-size: 0.9rem;
+  }
+
+  .edit-section {
+    padding: 16px;
+  }
+
+  .edit-section .form-actions {
+    flex-direction: column;
+  }
+
+  .edit-section .btn-save,
+  .edit-section .btn-cancel {
+    width: 100%;
+    text-align: center;
+  }
+}

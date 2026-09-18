@@ -13,7 +13,7 @@ $csrf_token = $input['csrf_token'] ?? '';
 validateCSRFToken($csrf_token);
 
 $user_id = $_SESSION['user_id'];
-$player = getPlayer($user_id);
+$player = getClickPlayer($user_id);
 
 // Reset enemy to level 1
 $enemy = getEnemyByLevel(1);

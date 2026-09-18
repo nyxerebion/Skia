@@ -10,7 +10,7 @@ if (!checkLogin()) {
 
 logAction('Played Click Adventure Game');
 
-$player = getPlayer($_SESSION['user_id']);
+$player = getClickPlayer($_SESSION['user_id']);
 ?>
 
 <!DOCTYPE html>
@@ -46,8 +46,8 @@ $player = getPlayer($_SESSION['user_id']);
                             <span id="enemyHealth"><?= $player['enemy_health'] ?? 100 ?></span>/
                             <span id="enemyMaxHealth"><?= $player['enemy_max_health'] ?? 100 ?></span>HP
                         </span>
-                        <span>👾 <span id="enemyDamage"><?= $player['enemy_damage'] ?? 2 ?></span> DMG</span>
-                        <span>🛡️ <span id="enemyDefense"><?= $player['enemy_defense'] ?? 0 ?></span> DEF</span>
+                        <span> <span id="enemyDamage"><?= $player['enemy_damage'] ?? 2 ?></span> DMG</span>
+                        <span> <span id="enemyDefense"><?= $player['enemy_defense'] ?? 0 ?></span> DEF</span>
                         <span>🎯 <span id="enemyCritChance"><?= $player['enemy_crit_chance'] ?? 5 ?></span> CRIT</span>
                         <span>💥 <span id="enemyCritMultiplier"><?= $player['enemy_crit_multiplier'] ?? 1.5 ?></span> MULT</span>
                         <span id="enemyTrueDamage" style="display: none;"></span>
@@ -87,8 +87,8 @@ $player = getPlayer($_SESSION['user_id']);
                             <span id="playerMaxHealth"><?= $player['max_health'] ?? 100 ?></span>HP
                         </span>
 
-                        <span>⚔️ <span id="playerDamage"><?= $player['damage'] ?? 2 ?></span> DMG</span>
-                        <span>🛡️ <span id="playerDefense"><?= $player['defense'] ?? 0 ?></span> DEF</span>
+                        <span> <span id="playerDamage"><?= $player['damage'] ?? 2 ?></span> DMG</span>
+                        <span> <span id="playerDefense"><?= $player['defense'] ?? 0 ?></span> DEF</span>
                         <span>👆 <span id="clickPower"><?= $player['click_power'] ?? 0 ?></span> CP</span>
                         <span>🎯 <span id="playerCritChance"><?= $player['crit_chance'] ?? 0 ?></span> CRIT</span>
                         <span>💥 <span id="playerCritMultiplier"><?= $player['crit_multiplier'] ?? 0 ?></span> MULT</span>
@@ -112,10 +112,7 @@ $player = getPlayer($_SESSION['user_id']);
 
             <div class="resources">
                 <span>👆 CLICKS: <span id="clicksCount">0</span></span>
-                <span>👆 TOTAL CLICKS: <span id="totalClicksCount">0</span></span>
-
                 <span>💰 COINS: <span id="coinsCount">0</span></span>
-                <span>💰 TOTAL COINS: <span id="totalCoinsCount">0</span></span>
             </div>
 
             <button id="shopToggleBtn" class="btn">🏪 Shop</button>
@@ -152,9 +149,107 @@ $player = getPlayer($_SESSION['user_id']);
             <h3>Navigate to:</h3>
             <div class="links">
                 <a href="index.php">Game Center</a>
+                <a href="../pages/contents.php">Dashboard</a>
                 <a href="../index.php">Home Page</a>
             </div>
         </nav>
+
+        <section class="panels-container">
+            <div class="stats-panel">
+                <h3>📊 STATS</h3>
+                <div class="stat-row">
+                    <span>⚔️ dmg</span><span id="statDamage">4</span>
+                </div>
+                <div class="stat-row">
+                    <span>👆 click</span><span id="statClickPower">12</span>
+                </div>
+                <div class="stat-row">
+                    <span>❤️ max HP</span><span id="statMaxHealth">100</span>
+                </div>
+                <div class="stat-row">
+                    <span>🛡️ def</span><span id="statDefense">2</span>
+                </div>
+                <div class="stat-row">
+                    <span>🎯 crit</span><span id="statCritChance">5%</span>
+                </div>
+                <div class="stat-row">
+                    <span>💥 crit mult</span><span id="statCritMultiplier">1.5x</span>
+                </div>
+                <div class="stat-row">
+                    <span>🩸 vampire</span><span id="statVampire">—</span>
+                </div>
+                <div class="stat-row">
+                    <span>🔮 super crit</span><span id="statSuperCrit">—</span>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <h3>📈 HISTORY</h3>
+                <div class="stat-row">
+                    <span>💰 coins now</span><span id="currentCoins">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>🪙 coins earned</span><span id="totalCoinsEarned">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>💸 coins spent</span><span id="totalCoinsSpent">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>👆 clicks now</span><span id="currentClicks">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>🖱️ total clicks</span><span id="totalClicksEarned">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>💸 clicks spent</span><span id="totalClicksSpent">0</span>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <h3>🏆 ACHIEVES</h3>
+                <div class="stat-row">
+                    <span>⚔️ top dmg</span><span id="highestDamage">4</span>
+                </div>
+                <div class="stat-row">
+                    <span>🎯 best crit</span><span id="highestCrit">5%</span>
+                </div>
+                <div class="stat-row">
+                    <span>💀 kills</span><span id="enemiesDefeated">0</span>
+                </div>
+                <div class="stat-row">
+                    <span>⏱️ time</span><span id="playTime">0s</span>
+                </div>
+            </div>
+
+            <!--
+            <div class="level-panel">
+                <h3>⭐ LEVEL</h3>
+                <div class="level-row">
+                    <span>level</span><span id="playerLevel">1</span>
+                </div>
+                <div class="level-row">
+                    <span>XP</span>
+                    <span>
+                        <span id="playerXP">0</span> /
+                        <span id="playerXPMax">100</span>
+                    </span>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar-bg">
+                        <div id="xpBar" class="xp-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="level-row">
+                    <span>next bonus</span><span id="nextLevelBonus">+2 dmg, +10 HP</span>
+                </div>
+                <div class="level-row">
+                    <span>total levels</span><span id="totalLevels">14</span>
+                </div>
+                <div class="level-row">
+                    <span>required XP</span><span id="reqXP">500</span>
+                </div>
+            </div>-->
+        </section>
 
         <!-- Revive Modal -->
         <div id="reviveModal" class="revive-modal" style="display:none;">
@@ -174,13 +269,6 @@ $player = getPlayer($_SESSION['user_id']);
         </div>
     </main>
 
-    <!-- After header, before main -->
-    <div class="dev-notice">
-        <span class="dev-icon">🚧</span>
-        <span class="dev-text">Under Development</span>
-        <span class="dev-sub">Click Adventure is currently in progress. Check back soon!</span>
-    </div>
-
     <footer>
         <p>
             Made with ❤️ by Axel | 2025-<?php echo date('Y'); ?>
@@ -189,6 +277,7 @@ $player = getPlayer($_SESSION['user_id']);
 
     <script src="js/click.js?=<?= filemtime(__DIR__ . '/js/click.js') ?>"></script>
     <script src="js/click-shop.js?=<?= filemtime(__DIR__ . '/js/click-shop.js') ?>"></script>
+    <script src="js/game-helper.js?=<?= filemtime(__DIR__ . '/js/click-helper.js') ?>"></script>
     <script src="js/click-helper.js?=<?= filemtime(__DIR__ . '/js/click-helper.js') ?>"></script>
 </body>
 

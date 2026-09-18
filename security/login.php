@@ -8,7 +8,7 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $ip = $_SERVER['REMOTE_ADDR'];
+    $ip = getRealIP();
     checkRateLimit($pdo, $ip, 'login', 5, 15);
 
     $login = trim($_POST['login']);
@@ -26,8 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
+            secure_session_regenerate();
             clearRateLimit($pdo, $ip, 'login');
-            session_regenerate_id(true);
             setcookie(session_name(), session_id(), 0, '/', '', false, true);
 
             $_SESSION['user_id'] = $user['id'];
@@ -44,6 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setcookie('remember_token', $token, time() + (30 * 24 * 60 * 60), '/', '', $secure, true);
                 setcookie('user_id', $user['id'], time() + (30 * 24 * 60 * 60), '/', '', $secure, true);
             }
+
+            $stmt = $pdo->prepare("
+                UPDATE users
+                SET last_ip = ?, last_activity = NOW()
+                WHERE id = ?
+            ");
+            $stmt->execute([$ip, $user['id']]);
 
             logAction("User logged in: " . $user['username']);
             header("Location: ../index.php");
@@ -108,9 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
                 <label for="login">Username or Email:</label>
                 <input type="text" id="login" name="login"
-                     placeholder="Username or Email" required
-                     maxlength="100"
-                     title="Enter your username or email">
+                    placeholder="Username or Email" required
+                    maxlength="100"
+                    title="Enter your username or email">
 
                 <label for="passwordField">Password:</label>
                 <div class="password-wrapper">
@@ -118,9 +125,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button type="button" class="toggle-btn" onclick="togglePasswordVisibility('passwordField', this)">Show</button>
                 </div>
 
-                <label class="remember-checkbox">
-                    <input type="checkbox" name="remember"> Remember me
-                </label>
+                <div class="optional-controls">
+                    <label class="remember-checkbox">
+                        <input type="checkbox" name="remember"> Remember me
+                    </label>
+                    <a href="forgot-password.php">Forgot password</a>
+                </div>
 
                 <button type="submit">Login</button>
             </form>
@@ -132,9 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <footer>Made with ❤️ by Axel | <?= date('Y') ?></footer>
 
     <script>
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', () => {
             handleMessage();
-        };
+            document.querySelector('input[name="remember"]').checked = true;
+        });
 
         function handleMessage() {
             const flashMessage = document.querySelector(".flash-message");

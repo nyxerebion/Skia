@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Card</title>
+
+    <style>
+        * {
+            font-family: sans-serif;
+        }
+
+        .container {
+            height: 850px;
+            display: flex;
+
+        }
+
+        .child-container {
+            width: 550px;
+            margin-right: 30px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border: 1px solid #000;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 2px solid #000;
+            padding: 3px 5px;
+            text-align: center;
+        }
+
+        td:first-child {
+            text-align: left;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 4px;
+            border: 0;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        th {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .subject {
+            font-size: 0.75rem;
+            width: 500px;
+        }
+
+        .first-table {
+            margin-bottom: 20px;
+        }
+
+        .third-table td,
+        .third-table th {
+            border-width: 1px;
+        }
+
+        .behavior-text {
+            text-align: left;
+            font-size: 0.8rem;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: transparent;
+            border: 1px solid #ccc;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 50px;
+            border: 0;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 0.9rem;
+        }
+
+        .legend-table {
+            width: 100%;
+            border: 1px solid #000;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 0.75rem;
+        }
+
+        .legend-table th,
+        .legend-table td {
+            border: 1px solid #000;
+            padding: 4px 8px;
+            text-align: left;
+        }
+
+        .legend-table th {
+            text-align: center;
+            background: #f0f0f0;
+        }
+
+        .legend-table td:first-child {
+            text-align: center;
+            width: 60px;
+        }
+
+        .grading-table {
+            width: 100%;
+            border: 2px solid #000;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.8rem;
+        }
+
+        .grading-table th,
+        .grading-table td {
+            border: 2px solid #000;
+            padding: 4px 8px;
+            text-align: center;
+        }
+
+        .grading-table thead th {
+            background: #f0f0f0;
+            font-weight: 700;
+        }
+
+        .grading-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="child-container">
+            <strong class="title">REPORT ON LEARNING PROGRESS AND ACHIEVEMENT</strong>
+
+            <table class="first-table">
+                <thead>
+                    <tr>
+                        <th colspan="4" style="text-align: left;">First Semester</th>
+                    </tr>
+                    <tr>
+                        <th>Subjects</th>
+                        <th>1st Quarter</th>
+                        <th>2nd Quarter</th>
+                        <th style="width: 80px;">Semester Final Grade</th>
+                    </tr>
+                    <tr>
+                        <th colspan="4" style="text-align: left;">Core Subjects</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class="subject">Earth and Life Science</td>
+                        <td>83</td>
+                        <td>94</td>
+                        <td>89</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">General Mathematics</td>
+                        <td>80</td>
+                        <td>96</td>
+                        <td>88</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Komunikasyon at Pananaliksik sa Wika at Kulturang
+                            Pilipino</td>
+                        <td>84</td>
+                        <td>90</td>
+                        <td>87</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Oral Communication in Context</td>
+                        <td>82</td>
+                        <td>92</td>
+                        <td>87</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Physical Education and Health 1</td>
+                        <td>91</td>
+                        <td>93</td>
+                        <td>92</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject"><strong>Applied Subjects</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">English for Academic and Professional Purposes</td>
+                        <td>91</td>
+                        <td>88</td>
+                        <td>90</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject"><strong>Specialized Subjects</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Computer Systems Servicing 1</td>
+                        <td>83</td>
+                        <td>92</td>
+                        <td>88</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3" style="text-align: right;" class="subject"><strong>General Average</strong></td>
+                        <td><strong>88.71</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="second-table">
+                <thead>
+                    <tr>
+                        <th colspan="4" style="text-align: left;">Second Semester</th>
+                    </tr>
+                    <tr>
+                        <th>Subjects</th>
+                        <th>3rd Quarter</th>
+                        <th>4th Quarter</th>
+                        <th style="width: 80px;">Semester Final Grade</th>
+                    </tr>
+                    <tr>
+                        <th colspan="4" style="text-align: left;">Core Subjects</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td class="subject">Pagbasa at Pagsusuri ng Ibat Ibang Teksto Tungo sa Pananaliksik</td>
+                        <td>91</td>
+                        <td>94</td>
+                        <td>93</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Physical Education and Health 2</td>
+                        <td>93</td>
+                        <td>94</td>
+                        <td>94</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Physical Science</td>
+                        <td>83</td>
+                        <td>85</td>
+                        <td>84</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Reading and Writing Skills</td>
+                        <td>88</td>
+                        <td>91</td>
+                        <td>90</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Statistics and Probability</td>
+                        <td>90</td>
+                        <td>93</td>
+                        <td>92</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject"><strong>Applied Subjects</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Filipino Sa Piling Larangan</td>
+                        <td>84</td>
+                        <td>87</td>
+                        <td>86</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Practical Research 1</td>
+                        <td>85</td>
+                        <td>87</td>
+                        <td>86</td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject"><strong>Specialized Subjects</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="subject">Computer Systems Servicing 2</td>
+                        <td>91</td>
+                        <td>97</td>
+                        <td>94</td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3" style="text-align: right;" class="subject"><strong>General Average for the Semester</strong></td>
+                        <td><strong>89.88</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="child-container">
+            <strong class="title">REPORT ON LEARNER'S OBSERVED VALUES</strong>
+
+            <table class="third-table">
+                <thead>
+                    <tr>
+                        <th style="width:23%;">Core Values</th>
+                        <th style="width:34%;">Behavior Statements</th>
+                        <th>1st Quarter</th>
+                        <th>2nd Quarter</th>
+                        <th>3rd Quarter</th>
+                        <th>4th Quarter</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td rowspan="2" class="subject"><strong>1. Maka-Diyos</strong></td>
+                        <td class="behavior-text">Expresses one's spiritual beliefs while respecting the spiritual beliefs of others</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                    <tr>
+                        <td class="behavior-text">Shows adherence to ethical principles by upholding truth</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                    <tr>
+                        <td class="subject"><strong>2. Makatao</strong></td>
+                        <td class="behavior-text">Is sensitive to individual, social, and cultural differences</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                    <tr>
+                        <td class="subject"><strong>3. Makakalikasan</strong></td>
+                        <td class="behavior-text">Cares for the environment and utilizes resources wisely, judiciously and economically</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2" class="subject"><strong>4. Makabansa</strong></td>
+                        <td class="behavior-text">Demonstrates pride in being a Filipino; exercises the rights and responsibilities of a Filipino citizen</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                    <tr>
+                        <td class="behavior-text">Demonstrates appropriate behavior in carrying out activities in the school, community and country</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                        <td>SO</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="legend-table">
+                <thead>
+                    <tr>
+                        <th colspan="2">Observed Values Marking (Non-Numeric Rating)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>AO</strong></td>
+                        <td>Always Observed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SO</strong></td>
+                        <td>Sometimes Observed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RO</strong></td>
+                        <td>Rarely Observed</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NO</strong></td>
+                        <td>Not Observed</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Grading Scale -->
+            <table class="grading-table">
+                <thead>
+                    <tr>
+                        <th colspan="3">Learner Progress and Achievement</th>
+                    </tr>
+                    <tr>
+                        <th>Grading Scale</th>
+                        <th>Descriptors</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>90-100</td>
+                        <td>Outstanding</td>
+                        <td>Passed</td>
+                    </tr>
+                    <tr>
+                        <td>85-89</td>
+                        <td>Very Satisfactory</td>
+                        <td>Passed</td>
+                    </tr>
+                    <tr>
+                        <td>80-84</td>
+                        <td>Satisfactory</td>
+                        <td>Passed</td>
+                    </tr>
+                    <tr>
+                        <td>75-79</td>
+                        <td>Fairly Satisfactory</td>
+                        <td>Passed</td>
+                    </tr>
+                    <tr>
+                        <td>Below 75</td>
+                        <td>Did Not Meet Expectations</td>
+                        <td>Failed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

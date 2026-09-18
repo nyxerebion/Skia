@@ -86,10 +86,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                onclick="markRead(<?= $notif['id'] ?>, '<?= $notif['link'] ?>')">
+                                data-id="<?= $notif['id'] ?>"
+                                data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
                                 <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
                                 <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
-                                <div class="time"><?= timeAgo($notif['created_at']) ?></div>
+                                <div class="meta">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                        <?php
+                                        $senderLabels = [
+                                            'system' => '🤖 System',
+                                            'creator' => '👑 Creator',
+                                            'admin' => '🛡️ Admin',
+                                            'user' => '👤 User'
+                                        ];
+                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        ?>
+                                    </span>
+                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="time"><?= timeAgo($notif['created_at']) ?></span>
+                                </div>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -111,14 +126,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-                    <label>
-                        <input type="checkbox" id="darkMode" onclick="toggleTheme()"> Dark Mode
-                    </label>
+
+                    <div class="theme-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="darkMode" onchange="toggleTheme()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                 </div>
                 <div class="other">
                     <h4>Other</h4>
-                    <label>
-                        Soon..
+                    <a href="<?= SITE_URL ?>/pages/settings.php"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings">
+                            <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg> Settings</a> <label>
+
                     </label>
                 </div>
             </div>
@@ -157,22 +180,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
         </nav>
 
+
+        <div class="online-wrapper">
+            🟢 <span class="online-users">0</span> Online now
+            <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-external-link-icon lucide-external-link">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                </svg>
+            </span>
+
+            <div class="online-users-view" style="display: none;">
+                <div class="section-header">
+                    <h3>Online Users</h3>
+                    <span id="onlineUsersCount">(0)</span>
+                </div>
+
+                <div class="online-users-list" id="onlineUsersList">
+                    <!-- Online users will be populated here -->
+                </div>
+
+                <div class="bottom-wrapper">
+                    <p>Touch outside to close</p>
+                    <button onclick="closeOnlineUsers()">close</button>
+                </div>
+            </div>
+        </div>
+
         <div class="sidebar-profile">
             <a href="../pages/profile.php" class="profile-link">
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
+                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
+
+
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
                         <span class="profile-role"><?= htmlspecialchars($_SESSION['role'] ?? 'unknown') ?></span>
                     </div>
                 </div>
-                <span class="more-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical-icon lucide-ellipsis-vertical">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                    </svg></span>
+
             </a>
         </div>
     </aside>
@@ -191,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <textarea name="content" placeholder="Content" rows="4" required></textarea>
+                    <textarea name="content" placeholder="Content" rows="4" oninput="autoResize(this)" required></textarea>
                 </div>
 
                 <div class="form-group">

@@ -96,7 +96,7 @@ header h1 {
 main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* ============================================
@@ -316,7 +316,7 @@ main {
   border-radius: 12px;
   font-size: 0.9rem;
   min-height: 50px;
-  max-height: 140px;
+  max-height: 250px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -329,7 +329,7 @@ main {
   align-items: center;
   justify-content: center;
   min-height: 40px;
-  max-height: 130px;
+  max-height: 240px;
   overflow-y: hidden;
 }
 
@@ -415,12 +415,13 @@ main {
 .resources {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 18px;
   padding: 12px 16px;
   background: var(--bg-body);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   font-weight: 600;
+  justify-content: center;
 }
 
 .resources span {
@@ -826,10 +827,11 @@ footer p {
   border-radius: var(--radius-sm);
   padding: 20px;
   margin-top: 12px;
-  max-height: 550px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 /* ============================================
@@ -936,11 +938,8 @@ footer p {
    ============================================ */
 #shopItems {
   flex: 1;
-  overflow-y: auto;
   padding-right: 4px;
   min-height: 100px;
-  max-height: 400px;
-  overflow-y: auto;
 }
 
 #shopItems::-webkit-scrollbar {
@@ -964,14 +963,14 @@ footer p {
    ============================================ */
 .shop-item {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  gap: 20px;
   padding: 12px 16px;
   background: var(--bg-body);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   transition: all 0.2s ease;
   margin-bottom: 8px;
+  width: 100%;
 }
 
 .shop-item:hover {
@@ -991,8 +990,19 @@ footer p {
 .shop-item-icon {
   font-size: 2rem;
   min-width: 50px;
-  text-align: center;
+  text-align: left;
   flex-shrink: 0;
+}
+
+.item-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.item-wrapper >* {
+  flex: 1;
 }
 
 .shop-item-info {
@@ -1044,11 +1054,20 @@ footer p {
   flex-shrink: 0;
 }
 
+.buy-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
 .shop-buy-container {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
 }
 
 .requirements {
@@ -1120,7 +1139,7 @@ footer p {
 @media (max-width: 768px) {
   .shop-container {
     padding: 16px;
-    max-height: 500px;
+    max-height: 75vh;
   }
 
   .shop-header {
@@ -1143,7 +1162,6 @@ footer p {
   }
 
   .shop-item {
-    flex-wrap: wrap;
     gap: 10px;
     padding: 10px 12px;
   }
@@ -1162,13 +1180,6 @@ footer p {
     text-align: left;
   }
 
-  .shop-buy-container {
-    align-items: flex-start;
-    flex-direction: row;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
   .requirements {
     font-size: 0.7rem;
   }
@@ -1179,10 +1190,10 @@ footer p {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 500px) {
   .shop-container {
     padding: 12px;
-    max-height: 450px;
+    max-height: 80vh;
   }
 
   .shop-tab {
@@ -1194,6 +1205,32 @@ footer p {
   .shop-item {
     padding: 8px 10px;
     gap: 8px;
+  }
+
+  .item-wrapper {
+    flex-direction: column;
+    align-items: start;
+    justify-content: start;
+  }
+
+  .item-wrapper >* {
+    width: 100%;
+  }
+
+  .shop-item-info {
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .buy-wrapper {
+    justify-content: start;
+  }
+
+  .shop-buy-container {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
   }
 
   .shop-item-icon {
@@ -1226,53 +1263,102 @@ footer p {
   }
 }
 
-
 .combat-effect.vampire {
-    color: #ff6b9d;
-    text-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+  color: #ff6b9d;
+  text-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
 }
 
 .combat-effect.xp {
-    color: #ffd700;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .combat-effect.levelup {
-    color: #00ff88;
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  color: #00ff88;
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
 .combat-effect.stance {
-    color: #66ccff;
-    text-shadow: 0 0 10px rgba(102, 204, 255, 0.5);
+  color: #66ccff;
+  text-shadow: 0 0 10px rgba(102, 204, 255, 0.5);
 }
 
 .xp-bar-container {
-    width: 100%;
-    background: #2a2a2a;
-    border-radius: 4px;
-    height: 20px;
-    margin: 8px 0;
-    position: relative;
-    overflow: hidden;
+  width: 100%;
+  background: #2a2a2a;
+  border-radius: 4px;
+  height: 20px;
+  margin: 8px 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .xp-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #7b2ff7, #a855f7);
-    border-radius: 4px;
-    transition: width 0.3s ease;
-    width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #7b2ff7, #a855f7);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  width: 0%;
 }
 
 .xp-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-    white-space: nowrap;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
 }
+
+.panels-container {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.stats-panel, .level-panel {
+    background: var(--bg-card);
+    border-radius: 18px;
+    padding: 15px;
+    border: 2px solid var(--border-color);
+}
+
+.stats-panel h3, .level-panel h3 {
+    font-size: 1.3rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    color: #ffcf8a;
+}
+
+.stat-row, .level-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+
+/* XP Bar 
+.xp-bar-container {
+    margin: 12px 0;
+}
+
+.xp-bar-bg {
+    background: var(--bg-hero);
+    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    padding: 8px 4px;
+}
+
+.xp-bar-fill {
+    height: auto;
+    background: var(--accent);
+    width: 0;
+    transition: width 0.2s;
+}*/

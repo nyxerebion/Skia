@@ -18,7 +18,7 @@ try {
     validateCSRFToken($csrf_token);
 
     $user_id = $_SESSION['user_id'];
-    $player = getPlayer($user_id);
+    $player = getClickPlayer($user_id);
 
     // Load shop upgrades from JSON
     $upgrades = json_decode($player['shop_upgrades'] ?? '{}', true);
@@ -160,7 +160,7 @@ try {
             $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
             $stmt->execute([$user_id]);
             $stats = $stmt->fetch();
-            $stats['max_enemy_level'] = getMaxEnemyLevel();
+            $stats = enrichClickStats($stats);
 
             echo json_encode([
                 'success' => true,

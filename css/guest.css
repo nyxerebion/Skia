@@ -310,7 +310,6 @@ main {
       "dashboard"
       "updates"
       "about-site"
-      "full-section"
       "about"
       "get-started"
       "footer";
@@ -443,12 +442,14 @@ main {
   justify-content: center;
   flex-wrap: wrap;
   margin-bottom: 20px;
+  align-items: center;
 }
 
 .get-started-actions .btn-primary {
   background: var(--accent);
   color: var(--bg-surface);
   padding: 12px 32px;
+  height: fit-content;
   border-radius: 40px;
   text-decoration: none;
   font-weight: 600;
@@ -510,6 +511,7 @@ main {
   border-radius: var(--radius-sm);
   padding: 32px;
   border: 1px solid var(--border);
+  margin: 0;
 }
 
 .about-container {
@@ -642,6 +644,7 @@ main {
   padding: 32px 24px;
   border: 1px solid var(--border);
   text-align: center;
+  margin: 0;
 }
 
 .about-site-container {
@@ -714,4 +717,8 @@ main {
 
 aside.minimized .get-started-actions {
   display: none;
+}
+
+.online-wrapper {
+  margin-bottom: 10px;
 }

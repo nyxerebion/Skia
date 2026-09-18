@@ -26,6 +26,7 @@ if ($increment <= 0) {
 }
 
 $user_id = $_SESSION['user_id'];
+$new_time = 0;
 
 $stmt = $pdo->prepare("SELECT user_id, time_played FROM whack_scores WHERE user_id = ?");
 $stmt->execute([$user_id]);
@@ -33,11 +34,12 @@ $existing = $stmt->fetch();
 
 if ($existing) {
     $new_time = $existing['time_played'] + $increment;
-    $stmt = $pdo->prepare("UPDATE whack_scores SET time_played = ? WHERE user_id = ?");
+    $stmt = $pdo->prepare("UPDATE whack_scores SET time_played = ?, last_played = NOW() WHERE user_id = ?");
     $stmt->execute([$new_time, $existing['user_id']]);
 } else {
-    $stmt = $pdo->prepare("INSERT INTO whack_scores (user_id, time_played) VALUES (?, ?)");
+    $new_time = $increment;
+    $stmt = $pdo->prepare("INSERT INTO whack_scores (user_id, time_played, last_played) VALUES (?, ?, NOW())");
     $stmt->execute([$user_id, $increment]);
 }
 
-echo json_encode(['success' => true, 'time_played' => $new_time ?? $increment]);
+echo json_encode(['success' => true, 'time_played' => $new_time]);
