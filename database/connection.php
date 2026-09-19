@@ -15,17 +15,18 @@ if ($is_local) {
     $username = 'root';
     $password = '';
 } else {
-    $host = $_ENV['DB_HOST'] ?? $_ENV('DB_HOST') ?: 'localhost';
-    $dbname = $_ENV['DB_NAME'] ?? $_ENV('DB_NAME') ?: 'skiadb';
-    $username = $_ENV['DB_USER'] ?? $_ENV('DB_USER') ?: 'root';
-    $password = $_ENV['DB_PASS'] ?? $_ENV('DB_PASS') ?: '';
+    $host = $_ENV['DB_HOST'] ?? 'localhost';
+    $dbname = $_ENV['DB_NAME'] ?? 'skiadb';
+    $username = $_ENV['DB_USER'] ?? 'root';
+    $password = $_ENV['DB_PASS'] ?? '';
 }
 
 try {
     $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false
+        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_TIMEOUT => 5,
     ];
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password, $options);
 } catch (PDOException $e) {
