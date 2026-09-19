@@ -30,8 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
     }
 
     $uploadDir = __DIR__ . '/../../uploads/avatars/';
+    $archiveDir = __DIR__ . '/../../uploads/avatars_archive/';
+
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
+    }
+
+    if (!is_dir($archiveDir)) {
+        mkdir($archiveDir, 0755, true);
     }
 
     $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -68,17 +74,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_avatar'])) {
         exit;
     }
 
-    // Delete old avatar
+    // Archive old avatar with unique name (instead of deleting)
     $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $oldAvatar = $stmt->fetchColumn();
+
     if ($oldAvatar && file_exists($uploadDir . $oldAvatar)) {
-        unlink($uploadDir . $oldAvatar);
+        rename($uploadDir . $oldAvatar, $archiveDir . $oldAvatar);
     }
 
     // Update database
     $stmt = $pdo->prepare("UPDATE users SET avatar = ? WHERE id = ?");
     $stmt->execute([$filename, $_SESSION['user_id']]);
+
+    // Log to avatar_history
+    $stmt = $pdo->prepare("
+        INSERT INTO avatar_history (
+            user_id, previous_avatar, updated_avatar,
+            change_type, avatar_updated_at, changed_by
+        ) VALUES (?, ?, ?, 'upload', NOW(), ?)
+    ");
+    $stmt->execute([
+        $_SESSION['user_id'],
+        $oldAvatar,
+        $filename,
+        $_SESSION['user_id']
+    ]);
 
     logAction('avatar_updated');
 
