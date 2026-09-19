@@ -1,6 +1,6 @@
-# Skia Database Schema
-
-```sql
+-- ============================================
+-- USERS
+-- ============================================
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci UNIQUE NOT NULL,
@@ -15,23 +15,31 @@ CREATE TABLE IF NOT EXISTS users (
     last_activity DATETIME DEFAULT NULL,
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_token_expires DATETIME DEFAULT NULL,
+    last_reset_request DATETIME DEFAULT NULL,
+    password_updated_at DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    password_updated_at DATETIME DEFAULT NULL,
     INDEX idx_username (username),
     INDEX idx_email (email),
     INDEX idx_last_activity (last_activity),
     INDEX idx_remember_token (remember_token)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- PROFILE UPDATES
+-- ============================================
 CREATE TABLE IF NOT EXISTS profile_updates (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
     action VARCHAR(100) NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_user_id (user_id)
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- ACTIVITY LOG
+-- ============================================
 CREATE TABLE IF NOT EXISTS activity_log (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED DEFAULT NULL,
@@ -40,9 +48,13 @@ CREATE TABLE IF NOT EXISTS activity_log (
     ip_address VARCHAR(45) DEFAULT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
-    INDEX idx_timestamp (timestamp)
+    INDEX idx_timestamp (timestamp),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- NOTES
+-- ============================================
 CREATE TABLE IF NOT EXISTS notes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -54,9 +66,13 @@ CREATE TABLE IF NOT EXISTS notes (
     archived_at DATETIME DEFAULT NULL,
     archived_by INT UNSIGNED DEFAULT NULL,
     INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (archived_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- UPDATES
+-- ============================================
 CREATE TABLE IF NOT EXISTS updates (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -65,9 +81,13 @@ CREATE TABLE IF NOT EXISTS updates (
     type ENUM('feature', 'fix', 'improvement', 'security', 'patch', 'tweak') DEFAULT 'improvement',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_user_id (user_id)
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- RATE LIMITS
+-- ============================================
 CREATE TABLE IF NOT EXISTS rate_limits (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     ip_address VARCHAR(45) NOT NULL,
@@ -78,10 +98,12 @@ CREATE TABLE IF NOT EXISTS rate_limits (
     archived TINYINT(1) DEFAULT 0,
     INDEX idx_ip_action (ip_address, action),
     INDEX idx_last_attempt (last_attempt),
-    INDEX idx_archived (archived),
-    
+    INDEX idx_archived (archived)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- POSTS
+-- ============================================
 CREATE TABLE IF NOT EXISTS posts (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -95,9 +117,13 @@ CREATE TABLE IF NOT EXISTS posts (
     INDEX idx_user_id (user_id),
     INDEX idx_created_at (created_at),
     INDEX idx_archived (archived),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (archived_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- COMMENTS
+-- ============================================
 CREATE TABLE IF NOT EXISTS comments (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     post_id INT UNSIGNED NOT NULL,
@@ -105,41 +131,66 @@ CREATE TABLE IF NOT EXISTS comments (
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_post_id (post_id),
-    INDEX idx_user_id (user_id)
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- LIKES
+-- ============================================
 CREATE TABLE IF NOT EXISTS likes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     post_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_like (post_id, user_id)
+    UNIQUE KEY unique_like (post_id, user_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- COMMENT LIKES
+-- ============================================
 CREATE TABLE IF NOT EXISTS comment_likes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     comment_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_comment_like (comment_id, user_id)
+    UNIQUE KEY unique_comment_like (comment_id, user_id),
+    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- UPDATE LIKES
+-- ============================================
 CREATE TABLE IF NOT EXISTS update_likes (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     update_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_like (update_id, user_id)
+    UNIQUE KEY unique_like (update_id, user_id),
+    FOREIGN KEY (update_id) REFERENCES updates(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- FOLLOWS
+-- ============================================
 CREATE TABLE IF NOT EXISTS follows (
     id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     follower_id INT UNSIGNED NOT NULL,
     following_id INT UNSIGNED NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_follow (follower_id, following_id)
+    UNIQUE KEY unique_follow (follower_id, following_id),
+    FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- PENDING ACTIONS
+-- ============================================
 CREATE TABLE IF NOT EXISTS pending_actions (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     admin_id INT UNSIGNED NOT NULL,
@@ -153,9 +204,13 @@ CREATE TABLE IF NOT EXISTS pending_actions (
     reviewed_by INT UNSIGNED DEFAULT NULL,
     INDEX idx_status (status),
     INDEX idx_admin_id (admin_id),
-    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+    FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- NOTIFICATIONS
+-- ============================================
 CREATE TABLE IF NOT EXISTS notifications (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -166,12 +221,16 @@ CREATE TABLE IF NOT EXISTS notifications (
     link VARCHAR(255) DEFAULT NULL,
     sender_type ENUM('system', 'creator', 'admin', 'user') DEFAULT 'system',
     sender_id INT UNSIGNED DEFAULT NULL,
-
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
-    INDEX idx_is_read (is_read)
+    INDEX idx_is_read (is_read),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- WHACK SCORES
+-- ============================================
 CREATE TABLE IF NOT EXISTS whack_scores (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -186,6 +245,9 @@ CREATE TABLE IF NOT EXISTS whack_scores (
     UNIQUE KEY unique_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ============================================
+-- CLICK DATA
+-- ============================================
 CREATE TABLE IF NOT EXISTS click_data (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -223,6 +285,9 @@ CREATE TABLE IF NOT EXISTS click_data (
     UNIQUE KEY unique_user (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ============================================
+-- NAME HISTORY
+-- ============================================
 CREATE TABLE IF NOT EXISTS name_history (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -239,10 +304,19 @@ CREATE TABLE IF NOT EXISTS name_history (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
 
-## TO ADD
-
-- name and username version history (done)
-
-- bio history
+-- ============================================
+-- BIO HISTORY (OPTIONAL)
+-- ============================================
+CREATE TABLE IF NOT EXISTS bio_history (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    previous_bio TEXT DEFAULT NULL,
+    updated_bio TEXT DEFAULT NULL,
+    changed_by INT UNSIGNED DEFAULT NULL,
+    bio_updated_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
