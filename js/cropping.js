@@ -35,8 +35,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Show preview
       previewUrl = URL.createObjectURL(file);
-      const previewContainer = document.querySelector(".avatar-preview");
+      const previewContainer = document.getElementById("avatarPreview");
       if (previewContainer) {
+        previewContainer.innerHTML = "";
+        
         let previewImg = previewContainer.querySelector("img");
         if (previewImg) {
           previewImg.src = previewUrl;

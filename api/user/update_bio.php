@@ -32,8 +32,26 @@ if (!empty($errors)) {
     exit;
 }
 
+// Update bio
 $stmt = $pdo->prepare("UPDATE users SET bio = ? WHERE id = ?");
 $stmt->execute([$new_bio, $_SESSION['user_id']]);
+
+// Log to bio_history
+$stmt = $pdo->prepare("
+    INSERT INTO bio_history (
+        user_id,
+        previous_bio,
+        updated_bio,
+        bio_updated_at,
+        changed_by
+    ) VALUES (?, ?, ?, NOW(), ?)
+");
+$stmt->execute([
+    $_SESSION['user_id'],
+    $old_bio,
+    $new_bio,
+    $_SESSION['user_id']
+]);
 
 // No need to notify the user for bio updates.
 

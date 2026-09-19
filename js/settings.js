@@ -481,6 +481,9 @@ function handleUsernameUpdate() {
           displayEl.textContent = username;
         }
 
+        const usernameInfo = document.getElementById("usernameInfo");
+        usernameInfo.textContent = username;
+
         const popup = document.getElementById("usernamePopup");
         if (popup) {
           closePopup(popup);
@@ -555,6 +558,9 @@ function handleNameUpdate() {
         if (displayEl) {
           displayEl.textContent = name;
         }
+
+        const nameInfo = document.getElementById("nameInfo");
+        nameInfo.textContent = name;
 
         const popup = document.getElementById("namePopup");
         if (popup) {
@@ -678,6 +684,9 @@ function handleBioUpdate() {
 
         addMessage("", "info", "none", messageEl);
         input.classList.remove("valid", "invalid");
+
+        const bioInfo = document.getElementById("bioInfo");
+        bioInfo.textContent = bio;
 
         const popup = document.getElementById("bioPopup");
         if (popup) {

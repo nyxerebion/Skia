@@ -306,7 +306,7 @@ CREATE TABLE IF NOT EXISTS name_history (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- BIO HISTORY (OPTIONAL)
+-- BIO HISTORY 
 -- ============================================
 CREATE TABLE IF NOT EXISTS bio_history (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -315,6 +315,23 @@ CREATE TABLE IF NOT EXISTS bio_history (
     updated_bio TEXT DEFAULT NULL,
     changed_by INT UNSIGNED DEFAULT NULL,
     bio_updated_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- AVATAR HISTORY 
+-- ============================================
+CREATE TABLE IF NOT EXISTS avatar_history (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    previous_avatar VARCHAR(255) DEFAULT NULL,
+    updated_avatar VARCHAR(255) DEFAULT NULL,
+    change_type ENUM('upload', 'remove') DEFAULT 'upload',
+    avatar_updated_at DATETIME DEFAULT NULL,
+    changed_by INT UNSIGNED DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_user_id (user_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

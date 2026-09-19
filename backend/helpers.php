@@ -129,10 +129,10 @@ function getUserAvatar($userId)
                      class="avatar-img" 
                      loading="lazy"
                      onerror="this.style.display=\'none\';this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\'">
-                <div class="avatar-placeholder avatar-fallback" style="display:none;">' . strtoupper(substr($username, 0, 1)) . '</div>';
+                <div class="avatar-initials avatar-fallback" style="display:none;">' . strtoupper(substr($username, 0, 1)) . '</div>';
     } else {
         $initial = strtoupper(substr($username, 0, 1));
-        $html = '<div class="avatar-placeholder">' . $initial . '</div>';
+        $html = '<div class="avatar-initials">' . $initial . '</div>';
     }
 
     $avatarCache[$userId] = $html;

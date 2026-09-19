@@ -40,6 +40,17 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$current_user['id']]);
 $name_updated_at = $stmt->fetchColumn();
+
+// Latest bio update
+$stmt = $pdo->prepare("
+    SELECT bio_updated_at 
+    FROM bio_history 
+    WHERE user_id = ? AND bio_updated_at IS NOT NULL
+    ORDER BY bio_updated_at DESC 
+    LIMIT 1
+");
+$stmt->execute([$current_user['id']]);
+$bio_updated_at = $stmt->fetchColumn();
 ?>
 
 <!DOCTYPE html>
@@ -101,20 +112,21 @@ $name_updated_at = $stmt->fetchColumn();
                             <div class="info-wrapper">
                                 <div class="info-item solo" id="avatarItem">
                                     <span class="info-name">Avatar</span>
-                                    <span class="info-value avatar-preview">
+                                    <span class="info-value info-value-avatar">
                                         <?= getUserAvatar($current_user['id']) ?>
                                     </span>
                                     <span class="icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right">
                                             <path d="m9 18 6-6-6-6" />
-                                        </svg></span>
+                                        </svg>
+                                    </span>
                                 </div>
                             </div>
 
                             <div class="info-wrapper">
                                 <div class="info-item" id="usernameItem">
                                     <span class="info-name">Username</span>
-                                    <span class="info-value">
+                                    <span class="info-value" id="usernameInfo">
                                         <?= htmlspecialchars($current_user['username']) ?>
                                     </span>
                                     <span class="icon">
@@ -126,7 +138,7 @@ $name_updated_at = $stmt->fetchColumn();
 
                                 <div class="info-item" id="nameItem">
                                     <span class="info-name">Display Name</span>
-                                    <span class="info-value">
+                                    <span class="info-value" id="nameInfo">
                                         <?= htmlspecialchars(!empty($current_user['name']) ? $current_user['name'] : 'name not set') ?>
                                     </span>
                                     <span class="icon">
@@ -138,7 +150,7 @@ $name_updated_at = $stmt->fetchColumn();
 
                                 <div class="info-item" id="bioItem">
                                     <span class="info-name">Bio</span>
-                                    <span class="info-value">
+                                    <span class="info-value" id="bioInfo">
                                         <?= htmlspecialchars(!empty($current_user['bio']) ? $current_user['bio'] : 'no bio yet...')  ?>
                                     </span>
                                     <span class="icon">
@@ -325,6 +337,12 @@ $name_updated_at = $stmt->fetchColumn();
                         <small id="bioValidationMessage" class="validationMessage"></small>
                         <input type="submit" id="submitBioBtn" value="Confirm Changes">
                     </form>
+
+                    <p class="last_update">
+                        <?= $bio_updated_at
+                            ? "Last update on " . date("M d, Y", strtotime($bio_updated_at))
+                            : 'Not updated yet' ?>
+                    </p>
                 </div>
             </div>
         </div>
@@ -389,7 +407,7 @@ $name_updated_at = $stmt->fetchColumn();
                 <h2>Profile Picture</h2>
                 <p class="cooldown-notice">⏳ You can change your avatar anytime.</p>
 
-                <div class="avatar-preview">
+                <div class="avatar-preview" id="avatarPreview">
                     <?= getUserAvatar($current_user['id']) ?>
                 </div>
 

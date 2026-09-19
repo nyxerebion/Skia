@@ -1,7 +1,7 @@
 main {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  grid-template-rows: 1fr;
+  grid-template-rows: auto;
   grid-template-areas:
     "hero hero"
     "posts updates"
@@ -23,6 +23,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  height: fit-content;
 }
 
 .hero-section h1 span {
