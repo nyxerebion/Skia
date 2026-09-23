@@ -179,19 +179,18 @@ To do:
                             <button onclick="markAllRead()">Mark all read</button>
                         <?php endif; ?>
                     </div>
-
                     <?php $notifications = getNotifications($_SESSION['user_id']); ?>
                     <?php if (empty($notifications)): ?>
                         <div class="notification-empty">No notifications</div>
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                data-id="<?= $notif['id'] ?>"
+                                data-id="<?= (int) $notif['id'] ?>"
                                 data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
-                                <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
-                                <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
+                                <div class="title"><?= htmlspecialchars($notif['title'] ?? '') ?></div>
+                                <div class="message"><?= htmlspecialchars($notif['message'] ?? '') ?></div>
                                 <div class="meta">
-                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?? '' ?>">
                                         <?php
                                         $senderLabels = [
                                             'system' => '🤖 System',
@@ -199,10 +198,10 @@ To do:
                                             'admin' => '🛡️ Admin',
                                             'user' => '👤 User'
                                         ];
-                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        echo $senderLabels[$notif['sender_type'] ?? ''] ?? 'System';
                                         ?>
                                     </span>
-                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="type-badge <?= $notif['type'] ?? '' ?>"><?= htmlspecialchars($notif['type'] ?? '') ?></span>
                                     <span class="time"><?= timeAgo($notif['created_at']) ?></span>
                                 </div>
                             </div>

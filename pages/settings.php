@@ -72,7 +72,7 @@ $bio_updated_at = $stmt->fetchColumn();
     <header>
         <h1>Settings | Skia</h1>
         <div class="header-right">
-            <a href="javascript:history.back()">← Back</a>
+            <a href="<?= SITE_URL ?>/index.php">← Back</a>
         </div>
     </header>
 
@@ -81,7 +81,7 @@ $bio_updated_at = $stmt->fetchColumn();
         if ($flash): ?>
             <div class="flash-wrapper">
                 <div class="flash-message <?= $flash['type'] ?>">
-                    <?= htmlspecialchars($flash['message']) ?>
+                    <?= htmlspecialchars($flash['message'] ?? '') ?>
                 </div>
             </div>
         <?php endif; ?>

@@ -81,8 +81,6 @@ $stmt->execute();
 $whack_top_time = $stmt->fetch();
 
 // Click Adventure
-
-// Click leaderboard by total clicks
 $stmt = $pdo->prepare("
     SELECT u.id, u.username, c.total_clicks
     FROM click_data c
@@ -148,7 +146,7 @@ $stmt = $pdo->prepare("
         (SELECT kills FROM click_data ORDER BY kills DESC LIMIT 1) AS top_kills
 ");
 $stmt->execute();
-$click_top = $stmt->fetch();
+$click_top = $stmt->fetch() ?: [];
 ?>
 
 <!DOCTYPE html>
@@ -178,7 +176,7 @@ $click_top = $stmt->fetch();
                         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                     </svg>
-                    <?php $unread = getUnreadCount($_SESSION['user_id']);
+                    <?php $unread = (int) getUnreadCount($_SESSION['user_id']);
                     if ($unread > 0): ?>
                         <span class="notification-badge"><?= $unread ?></span>
                     <?php endif; ?>
@@ -191,19 +189,18 @@ $click_top = $stmt->fetch();
                             <button onclick="markAllRead()">Mark all read</button>
                         <?php endif; ?>
                     </div>
-
                     <?php $notifications = getNotifications($_SESSION['user_id']); ?>
                     <?php if (empty($notifications)): ?>
                         <div class="notification-empty">No notifications</div>
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                data-id="<?= $notif['id'] ?>"
+                                data-id="<?= (int) $notif['id'] ?>"
                                 data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
-                                <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
-                                <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
+                                <div class="title"><?= htmlspecialchars($notif['title'] ?? '') ?></div>
+                                <div class="message"><?= htmlspecialchars($notif['message'] ?? '') ?></div>
                                 <div class="meta">
-                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?? '' ?>">
                                         <?php
                                         $senderLabels = [
                                             'system' => '🤖 System',
@@ -211,10 +208,10 @@ $click_top = $stmt->fetch();
                                             'admin' => '🛡️ Admin',
                                             'user' => '👤 User'
                                         ];
-                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        echo $senderLabels[$notif['sender_type'] ?? ''] ?? 'System';
                                         ?>
                                     </span>
-                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="type-badge <?= $notif['type'] ?? '' ?>"><?= htmlspecialchars($notif['type'] ?? '') ?></span>
                                     <span class="time"><?= timeAgo($notif['created_at']) ?></span>
                                 </div>
                             </div>
@@ -238,7 +235,6 @@ $click_top = $stmt->fetch();
             <div class="menu-body">
                 <div class="theme">
                     <h4>Theme</h4>
-
                     <div class="theme-item">
                         <span>Dark Mode</span>
                         <label class="switch">
@@ -323,7 +319,6 @@ $click_top = $stmt->fetch();
             </a>
         </nav>
 
-
         <div class="online-wrapper">
             🟢 <span class="online-users">0</span> Online now
             <span onclick="viewOnlineUsers()" class="view-online-users" title="View Online Users">
@@ -356,16 +351,13 @@ $click_top = $stmt->fetch();
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
-                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
-
-
+                        <div class="status status-offline" data-user="<?= (int) $_SESSION['user_id'] ?>"></div>
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
                         <span class="profile-role"><?= htmlspecialchars($_SESSION['role'] ?? 'unknown') ?></span>
                     </div>
                 </div>
-
             </a>
         </div>
     </aside>
@@ -374,8 +366,8 @@ $click_top = $stmt->fetch();
         <?php $flash = getFlashMessage();
         if ($flash): ?>
             <div class="flash-wrapper">
-                <div class="flash-message <?= $flash['type'] ?>">
-                    <?= htmlspecialchars($flash['message']) ?>
+                <div class="flash-message <?= $flash['type'] ?? '' ?>">
+                    <?= htmlspecialchars($flash['message'] ?? '') ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -403,8 +395,8 @@ $click_top = $stmt->fetch();
                                 <div class="top-card score-leader">
                                     <span class="medal">🥇</span>
                                     <span class="label">Top Score</span>
-                                    <span class="player"><?= htmlspecialchars($whack_top_score['username']) ?></span>
-                                    <span class="value"><?= formatNumber($whack_top_score['score'], 'score', false) ?></span>
+                                    <span class="player"><?= htmlspecialchars($whack_top_score['username'] ?? '') ?></span>
+                                    <span class="value"><?= formatNumber((int) ($whack_top_score['score'] ?? 0), 'score', false) ?></span>
                                 </div>
                             <?php else: ?>
                                 <div class="top-card empty">
@@ -416,8 +408,8 @@ $click_top = $stmt->fetch();
                                 <div class="top-card points-leader">
                                     <span class="medal">👑</span>
                                     <span class="label">Most Points</span>
-                                    <span class="player"><?= htmlspecialchars($whack_top_points['username']) ?></span>
-                                    <span class="value"><?= formatNumber($whack_top_points['total_points'], 'points', false) ?></span>
+                                    <span class="player"><?= htmlspecialchars($whack_top_points['username'] ?? '') ?></span>
+                                    <span class="value"><?= formatNumber((int) ($whack_top_points['total_points'] ?? 0), 'points', false) ?></span>
                                 </div>
                             <?php else: ?>
                                 <div class="top-card empty">
@@ -429,8 +421,8 @@ $click_top = $stmt->fetch();
                                 <div class="top-card points-leader">
                                     <span class="medal">⏱️</span>
                                     <span class="label">Most Time Played</span>
-                                    <span class="player"><?= htmlspecialchars($whack_top_time['username']) ?></span>
-                                    <span class="value"><?= formatTime($whack_top_time['time_played']) ?></span>
+                                    <span class="player"><?= htmlspecialchars($whack_top_time['username'] ?? '') ?></span>
+                                    <span class="value"><?= formatTime((int) ($whack_top_time['time_played'] ?? 0)) ?></span>
                                 </div>
                             <?php else: ?>
                                 <div class="top-card empty">
@@ -462,15 +454,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatNumber($user['score'], 'score', false) ?></td>
+                                                    <td><?= formatNumber((int) ($user['score'] ?? 0), 'score', false) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -502,15 +494,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatNumber($user['total_points'], 'points', false) ?></td>
+                                                    <td><?= formatNumber((int) ($user['total_points'] ?? 0), 'points', false) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -542,15 +534,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatTime($user['time_played']) ?></td>
+                                                    <td><?= formatTime((int) ($user['time_played'] ?? 0)) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -564,40 +556,40 @@ $click_top = $stmt->fetch();
                 <div id="sub-tab2" class="sub-tab-content">
                     <div class="leaderboard">
                         <div class="top-players-grid">
-                            <?php if ($click_top && $click_top['top_clicks_user']): ?>
+                            <?php if (!empty($click_top['top_clicks_user'])): ?>
                                 <div class="top-card clicks-leader">
                                     <span class="medal">👆</span>
                                     <span class="label">Most Clicks</span>
-                                    <span class="player"><?= htmlspecialchars($click_top['top_clicks_user']) ?></span>
-                                    <span class="value"><?= formatNumber($click_top['top_clicks'], 'click', false) ?></span>
+                                    <span class="player"><?= htmlspecialchars($click_top['top_clicks_user'] ?? '') ?></span>
+                                    <span class="value"><?= formatNumber((int) ($click_top['top_clicks'] ?? 0), 'click', false) ?></span>
                                 </div>
 
                                 <div class="top-card coins-leader">
                                     <span class="medal">💰</span>
                                     <span class="label">Most Coins</span>
-                                    <span class="player"><?= htmlspecialchars($click_top['top_coins_user']) ?></span>
-                                    <span class="value"><?= formatNumber($click_top['top_coins'], 'coins', false) ?></span>
+                                    <span class="player"><?= htmlspecialchars($click_top['top_coins_user'] ?? '') ?></span>
+                                    <span class="value"><?= formatNumber((int) ($click_top['top_coins'] ?? 0), 'coins', false) ?></span>
                                 </div>
 
                                 <div class="top-card time-leader">
                                     <span class="medal">⏱️</span>
                                     <span class="label">Most Time Played</span>
-                                    <span class="player"><?= htmlspecialchars($click_top['top_time_user']) ?></span>
-                                    <span class="value"><?= formatTime($click_top['top_time']) ?></span>
+                                    <span class="player"><?= htmlspecialchars($click_top['top_time_user'] ?? '') ?></span>
+                                    <span class="value"><?= formatTime((int) ($click_top['top_time'] ?? 0)) ?></span>
                                 </div>
 
                                 <div class="top-card kills-leader">
                                     <span class="medal">💀</span>
                                     <span class="label">Most Kills</span>
-                                    <span class="player"><?= htmlspecialchars($click_top['top_kills_user']) ?></span>
-                                    <span class="value"><?= number_format($click_top['top_kills']) ?></span>
+                                    <span class="player"><?= htmlspecialchars($click_top['top_kills_user'] ?? '') ?></span>
+                                    <span class="value"><?= number_format((int) ($click_top['top_kills'] ?? 0)) ?></span>
                                 </div>
 
                                 <div class="top-card level-leader">
                                     <span class="medal">📊</span>
                                     <span class="label">Highest Level</span>
-                                    <span class="player"><?= htmlspecialchars($click_top['top_level_user']) ?></span>
-                                    <span class="value"><?= number_format($click_top['top_level']) ?></span>
+                                    <span class="player"><?= htmlspecialchars($click_top['top_level_user'] ?? '') ?></span>
+                                    <span class="value"><?= number_format((int) ($click_top['top_level'] ?? 0)) ?></span>
                                 </div>
                             <?php else: ?>
                                 <div class="top-card empty">
@@ -629,15 +621,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatNumber($user['total_clicks'], 'clicks', false) ?></td>
+                                                    <td><?= formatNumber((int) ($user['total_clicks'] ?? 0), 'clicks', false) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -669,15 +661,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatNumber($user['total_coins'], 'coins', false) ?></td>
+                                                    <td><?= formatNumber((int) ($user['total_coins'] ?? 0), 'coins', false) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -709,15 +701,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= number_format($user['kills']) ?></td>
+                                                    <td><?= number_format((int) ($user['kills'] ?? 0)) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -749,15 +741,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= number_format($user['level']) ?></td>
+                                                    <td><?= number_format((int) ($user['level'] ?? 0)) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -789,15 +781,15 @@ $click_top = $stmt->fetch();
                                             ?>
                                                 <tr>
                                                     <td class="<?= $rank_class ?>"><?= $rank_display ?></td>
-                                                    <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                    <td><a href="view-profile.php?id=<?= (int) $user['id'] ?>" class="user-link">
                                                             <span class="player-td">
                                                                 <span class="avatar-container avatar-sm">
                                                                     <?= getUserAvatar($user['id']) ?>
-                                                                </span><?= htmlspecialchars($user['username']) ?>
+                                                                </span><?= htmlspecialchars($user['username'] ?? '') ?>
                                                             </span>
                                                         </a>
                                                     </td>
-                                                    <td><?= formatTime($user['time_played']) ?></td>
+                                                    <td><?= formatTime((int) ($user['time_played'] ?? 0)) ?></td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -806,6 +798,7 @@ $click_top = $stmt->fetch();
                             </div>
                         </section>
                     </div>
+                </div>
             </section>
         </div>
 
@@ -836,27 +829,28 @@ $click_top = $stmt->fetch();
                                     <tbody>
                                         <?php foreach ($users as $user): ?>
                                             <tr>
-                                                <td>#<?= htmlspecialchars($user['id']) ?></td>
-                                                <td><a href="view-profile.php?id=<?= $user['id'] ?>" class="user-link">
+                                                <td>#<?= (int) ($user['id'] ?? 0) ?></td>
+                                                <td><a href="view-profile.php?id=<?= (int) ($user['id'] ?? 0) ?>" class="user-link">
                                                         <span class="player-td">
                                                             <span class="avatar-container avatar-sm">
                                                                 <?= getUserAvatar($user['id']) ?></span>
-                                                            <?= htmlspecialchars($user['username']) ?>
+                                                            <?= htmlspecialchars($user['username'] ?? '') ?>
                                                         </span>
                                                     </a>
                                                 </td>
                                                 <td><?= !empty($user['name']) ? htmlspecialchars($user['name']) : '—' ?></td>
                                                 <td>
-                                                    <span class="user-bio" onclick="showBioModal(this)"><?= htmlspecialchars($user['bio']) ?></span>
+                                                    <span class="user-bio" onclick="showBioModal(this)"><?= htmlspecialchars($user['bio'] ?? '') ?></span>
                                                 </td>
                                                 <?php
-                                                if ($user['role'] === 'creator') {
-                                                    $roleClass = $user['role'];
+                                                $role = $user['role'] ?? 'user';
+                                                if ($role === 'creator') {
+                                                    $roleClass = 'creator';
                                                 } else {
-                                                    $roleClass = $user['role'] === 'admin' ? 'admin' : 'user';
+                                                    $roleClass = $role === 'admin' ? 'admin' : 'user';
                                                 }
                                                 ?>
-                                                <td><span class="role-badge <?= $roleClass ?>"><?= htmlspecialchars($user['role']) ?></span></td>
+                                                <td><span class="role-badge <?= $roleClass ?>"><?= htmlspecialchars($role) ?></span></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -879,14 +873,15 @@ $click_top = $stmt->fetch();
                     <p class="empty-state">No updates yet.</p>
                 <?php else: ?>
                     <?php foreach ($updates as $update):
-                        $is_new = (time() - strtotime($update['created_at'])) < 86400;
-                        $icon = $icons[$update['type']] ?? '📌';
-                        $badge_class = $update['type'] ?? 'patch';
-                        $badge_label = $badge_labels[$update['type']] ?? ucfirst($update['type']);
+                        $is_new = (time() - strtotime($update['created_at'] ?? 'now')) < 86400;
+                        $type = $update['type'] ?? 'patch';
+                        $icon = $icons[$type] ?? '📌';
+                        $badge_class = $type;
+                        $badge_label = $badge_labels[$type] ?? ucfirst($type);
 
                         $stmt = $pdo->prepare("SELECT COUNT(*) FROM update_likes WHERE update_id = ? AND user_id = ?");
                         $stmt->execute([$update['id'], $_SESSION['user_id']]);
-                        $user_liked = $stmt->fetchColumn() > 0;
+                        $user_liked = (int) $stmt->fetchColumn() > 0;
 
                         $stmt = $pdo->prepare("
                             SELECT u.username
@@ -901,31 +896,31 @@ $click_top = $stmt->fetch();
 
                         $stmt = $pdo->prepare("SELECT COUNT(*) FROM update_likes WHERE update_id = ?");
                         $stmt->execute([$update['id']]);
-                        $like_count = $stmt->fetchColumn();
+                        $like_count = (int) $stmt->fetchColumn();
                     ?>
-                        <div class="update-card <?= $update['type'] ?>">
+                        <div class="update-card <?= htmlspecialchars($type) ?>">
                             <div class="update-header">
                                 <span><?= $icon ?></span>
-                                <span class="update-badge <?= $badge_class ?>"><?= $badge_label ?></span>
+                                <span class="update-badge <?= htmlspecialchars($badge_class) ?>"><?= htmlspecialchars($badge_label) ?></span>
                                 <?php if ($is_new): ?>
                                     <span class="update-new">New</span>
                                 <?php endif; ?>
                             </div>
-                            <h3 class="update-title"><?= htmlspecialchars($update['title']) ?></h3>
-                            <p class="update-content"><?= nl2br(htmlspecialchars($update['content'])) ?></p>
+                            <h3 class="update-title"><?= htmlspecialchars($update['title'] ?? '') ?></h3>
+                            <p class="update-content"><?= nl2br(htmlspecialchars($update['content'] ?? '')) ?></p>
                             <div class="update-footer">
-                                <span class="update-author">👤 <?= htmlspecialchars($update['username']) ?></span>
+                                <span class="update-author">👤 <?= htmlspecialchars($update['username'] ?? '') ?></span>
                                 <span class="dot">·</span>
                                 <span class="update-date">📅 <?= timeAgo($update['created_at']) ?></span>
                             </div>
                             <div class="update-actions">
-                                <button onclick="toggleUpdateLike(<?= $update['id'] ?>)" class="like-btn <?= $user_liked ? 'liked' : '' ?>">
-                                    <?= $user_liked ? '❤️' : '🤍' ?> <span id="update-like-count-<?= $update['id'] ?>"><?= $like_count ?></span>
+                                <button onclick="toggleUpdateLike(<?= (int) $update['id'] ?>)" class="like-btn <?= $user_liked ? 'liked' : '' ?>">
+                                    <?= $user_liked ? '❤️' : '🤍' ?> <span id="update-like-count-<?= (int) $update['id'] ?>"><?= $like_count ?></span>
                                 </button>
                                 <?php if ($like_count > 0): ?>
                                     <div class="update-likes">
                                         <?php if (count($liked_names) > 0): ?>
-                                            Liked by <?= implode(', ', array_map('htmlspecialchars', $liked_names)) ?>
+                                            Liked by <?= implode(', ', array_map(fn($n) => htmlspecialchars($n, ENT_QUOTES), $liked_names)) ?>
                                             <?php if ($like_count > 3): ?>
                                                 and <?= $like_count - 3 ?> others
                                             <?php endif; ?>

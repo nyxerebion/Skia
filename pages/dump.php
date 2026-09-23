@@ -41,7 +41,7 @@ $current_user = $stmt->fetch();
         if ($flash): ?>
             <div class="flash-wrapper">
                 <div class="flash-message <?= $flash['type'] ?>">
-                    <?= htmlspecialchars($flash['message']) ?>
+                    <?= htmlspecialchars($flash['message'] ?? '') ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -80,7 +80,7 @@ $current_user = $stmt->fetch();
                                             <input type="text" name="username" id="usernameField"
                                                 placeholder="<?= $current_user['username'] ?> (click to type)"
                                                 oninput="checkUsername(this.value)">
-                                                
+
                                         </span>
                                     </div>
                                     <small id="validationMessage">hello</small>

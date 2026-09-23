@@ -224,7 +224,7 @@ $whackOnlineUsers = getOnlinePlayersByGame('whack');
         if ($flash): ?>
             <div class="flash-wrapper">
                 <div class="flash-message <?= $flash['type'] ?>">
-                    <?= htmlspecialchars($flash['message']) ?>
+                    <?= htmlspecialchars($flash['message'] ?? '') ?>
                 </div>
             </div>
         <?php endif; ?>
