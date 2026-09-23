@@ -110,7 +110,7 @@ $bio_updated_at = $stmt->fetchColumn();
                             <h3>Profile details</h3>
 
                             <div class="info-wrapper">
-                                <div class="info-item solo" id="avatarItem">
+                                <div class="info-item" id="avatarItem">
                                     <span class="info-name">Avatar</span>
                                     <span class="info-value info-value-avatar">
                                         <?= getUserAvatar($current_user['id']) ?>
@@ -121,9 +121,7 @@ $bio_updated_at = $stmt->fetchColumn();
                                         </svg>
                                     </span>
                                 </div>
-                            </div>
 
-                            <div class="info-wrapper">
                                 <div class="info-item" id="usernameItem">
                                     <span class="info-name">Username</span>
                                     <span class="info-value" id="usernameInfo">

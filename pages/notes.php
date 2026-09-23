@@ -81,7 +81,7 @@ if (isset($_GET['edit'])) {
     <header>
         <h1>Notes | Skia</h1>
         <div class="header-right">
-            <a href="../index.php">← Back</a>
+            <a href="javascript:history.back()">← Back</a>
         </div>
     </header>
 
