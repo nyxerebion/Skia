@@ -92,6 +92,8 @@ Skia is a small social platform built from scratch — posts, comments, likes, p
 
 ```text
 skia/
+├── admin/         → Admin panel
+├── creator/       → Creator tools
 ├── api/           → JSON endpoints
 ├── backend/       → Config, helpers, email
 ├── core/          → Bootstrap and head
