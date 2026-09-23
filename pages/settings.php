@@ -72,7 +72,7 @@ $bio_updated_at = $stmt->fetchColumn();
     <header>
         <h1>Settings | Skia</h1>
         <div class="header-right">
-            <a href="../index.php">← Back</a>
+            <a href="javascript:history.back()">← Back</a>
         </div>
     </header>
 
