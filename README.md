@@ -3,17 +3,26 @@
 **A social platform where you play, post, and connect.**
 
 [![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?logo=php&logoColor=white)](https://php.net)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
+[![MySQL](https://img.shields.io/badge/MySQL%20%2F%20MariaDB-4479A1?logo=mysql&logoColor=white)](https://mysql.com)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+
+🔗 **[skia.unaux.com](https://skia.unaux.com)**
+
+---
+
+## Screenshots
+
+![Login](docs/screenshots/login.png)
+![Feed](docs/screenshots/feed.png)
+![Click Adventure](docs/screenshots/click-adventure.png)
+![Settings](docs/screenshots/settings.png)
 
 ---
 
 ## What is Skia?
 
 Skia is a small social platform built from scratch — posts, comments, likes, profiles, notifications, and two browser games with progression systems.
-
-It started as a whack-a-gold clone. It became something bigger.
 
 ---
 
@@ -48,11 +57,24 @@ It started as a whack-a-gold clone. It became something bigger.
 
 ---
 
+## Security
+
+- Session hardening — `use_strict_mode`, `use_only_cookies`, HttpOnly, SameSite=Lax, regeneration on privilege change
+- CSRF tokens on all state-changing requests
+- Rate limiting on auth endpoints (login, password reset)
+- Prepared statements (PDO) throughout — no string-concatenated queries
+- Password hashing via `password_hash()` / `password_verify()`
+- Upload validation — MIME type, size, dimension, WebP→JPG conversion
+- Layered input sanitization and validation
+- Activity logging and audit trails for account changes
+
+---
+
 ## Tech Stack
 
 | Layer        | Technology               |
 | ------------ | ------------------------ |
-| **Backend**  | PHP 8+, MySQL            |
+| **Backend**  | PHP 8+, MySQL / MariaDB  |
 | **Frontend** | Vanilla JS, CSS3         |
 | **Email**    | PHPMailer + Mailjet SMTP |
 | **Auth**     | Sessions + CSRF tokens   |
@@ -75,63 +97,6 @@ skia/
 ├── posts/         → Post feed
 └── security/      → Auth and validation
 ```
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/nyxerebion/Skia.git
-cd Skia
-```
-
-### 2. Install dependencies
-
-```bash
-composer install
-```
-
-### 3. Configure environment
-
-Create a `.env` file in the project root:
-
-```env
-DB_HOST=localhost
-DB_NAME=skiadb
-DB_USER=root
-DB_PASS=
-
-SMTP_HOST=in-v3.mailjet.com
-SMTP_PORT=587
-SMTP_USERNAME=your-api-key
-SMTP_PASSWORD=your-secret
-SMTP_FROM=your-email@gmail.com
-SMTP_NAME=Skia
-```
-
-### 4. Import the database
-
-```bash
-mysql -u root -p skiadb < database/schema.sql
-```
-
-### 5. Run locally
-
-Place the project in `htdocs/` and open:
-
-```link
-http://localhost/skia
-```
-
----
-
-## Live Demo
-
-🔗 **[skia.unaux.com](https://skia.unaux.com)**
-
-## Screenshots
-
-> _Coming soon — the platform is still under active development._
 
 ---
 
