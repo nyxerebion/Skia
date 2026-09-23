@@ -13,10 +13,16 @@
 
 ## Screenshots
 
-![Login](docs/screenshots/login.png)
-![Feed](docs/screenshots/feed.png)
-![Click Adventure](docs/screenshots/click-adventure.png)
-![Settings](docs/screenshots/settings.png)
+<!-- markdownlint-disable MD033 -->
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="Login" width="48%">
+  <img src="docs/screenshots/feed.png" alt="Feed" width="48%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/click-adventure.png" alt="Click Adventure" width="48%">
+  <img src="docs/screenshots/settings.png" alt="Settings" width="48%">
+</p>
+<!-- markdownlint-enable MD033 -->
 
 ---
 
