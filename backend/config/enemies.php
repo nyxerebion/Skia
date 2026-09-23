@@ -97,10 +97,11 @@ function getEnemies() {
 
 function getEnemyByLevel($level) {
     $enemies = getEnemies();
-    $level = min($level, count($enemies));
+    $level = (int) $level;
+    $level = max(1, min($level, count($enemies)));
     return $enemies[$level] ?? $enemies[1];
 }
 
 function getMaxEnemyLevel() {
-    return count(getEnemies());
+    return max(array_keys(getEnemies()));
 }

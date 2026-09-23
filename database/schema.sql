@@ -264,6 +264,7 @@ CREATE TABLE IF NOT EXISTS click_data (
     total_coins INT UNSIGNED DEFAULT 0,
     shop_upgrades JSON DEFAULT NULL,
     level INT UNSIGNED DEFAULT 1,
+    level_bonus_applied INT UNSIGNED DEFAULT 0,
     experience INT UNSIGNED DEFAULT 0,
     kills INT UNSIGNED DEFAULT 0,
     deaths INT UNSIGNED DEFAULT 0,

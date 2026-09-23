@@ -23,58 +23,45 @@ $enemy_level = $player['current_enemy_level'] ?? 1;
 $enemy = getEnemyByLevel($enemy_level);
 
 // Player damage
-$baseDamage = $player['damage'];
-$isCrit = rand(1, 100) <= $player['critical_chance'];
-$initialDamage = $isCrit ? floor($baseDamage * $player['critical_multiplier']) : $baseDamage;
+$baseDamage = (int) $player['damage'];
+$isCrit = rand(1, 100) <= (int) $player['critical_chance'];
+$initialDamage = $isCrit
+    ? (int) floor($baseDamage * (float) $player['critical_multiplier'])
+    : $baseDamage;
 
 // Enemy defense
-$enemyDefense = $enemy['defense'] ?? 0;
+$enemyDefense = (int) $enemy['defense'] ?? 0;
 $enemyDefenseBlocked = min($enemyDefense, max(0, $initialDamage - 1));
 $finalDamage = max(1, $initialDamage - $enemyDefense);
 
 // Defensive Stance (id 22) - Double defense effectiveness
 $defenseMultiplier = ($upgrades[22] ?? 0) > 0 ? 2 : 1;
-$effectiveDefense = $player['defense'] * $defenseMultiplier;
+$effectiveDefense = (int) $player['defense'] * $defenseMultiplier;
 
 // Enemy counter-attack
-$enemyIsCrit = rand(1, 100) <= $enemy['critChance'];
-$enemyBaseDamage = $enemy['damage'];
-$enemyFinalDamage = $enemyIsCrit ? floor($enemyBaseDamage * $enemy['critMultiplier']) : $enemyBaseDamage;
+$enemyIsCrit = rand(1, 100) <= (int) $enemy['critChance'];
+$enemyBaseDamage = (int) $enemy['damage'];
+$enemyFinalDamage = $enemyIsCrit
+    ? (int) floor($enemyBaseDamage * (float) $enemy['critMultiplier'])
+    : $enemyBaseDamage;
 $damageDealt = max(0, $enemyFinalDamage - $effectiveDefense);
 
 // Vampire (id 7) - Heal 10% of damage dealt
 $vampireHeal = 0;
 if (($upgrades[7] ?? 0) > 0) {
-    $vampireHeal = floor($finalDamage * 0.10);
+    $vampireHeal = (int) floor($finalDamage * 0.10);
 }
 
 // Update enemy health
-$newEnemyHealth = $player['enemy_health'] - $finalDamage;
+$newEnemyHealth = (int) $player['enemy_health'] - $finalDamage;
 
 // ✅ Check if player is dead
-if ($player['health'] <= 0) {
-    $stmt = $pdo->prepare("
-        UPDATE click_data 
-        SET health = max_health,
-            current_enemy = 'Rowan',
-            current_enemy_level = 1,
-            enemy_health = 100,
-            enemy_max_health = 100,
-            enemy_damage = 2,
-            enemy_reward = 50,
-            enemy_crit_chance = 0,
-            enemy_crit_multiplier = 1.5,
-            enemy_xp = 10,
-            deaths = deaths + 1,
-            last_played = NOW()
-        WHERE user_id = ?
-    ");
-    $stmt->execute([$user_id]);
+if ((int) $player['health'] <= 0) {
+    respawnPlayer($pdo, $user_id);
 
     $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
     $stmt->execute([$user_id]);
-    $stats = $stmt->fetch();
-    $stats = enrichClickStats($stats);
+    $stats = enrichClickStats($stmt->fetch());
 
     echo json_encode([
         'success' => true,
@@ -86,7 +73,7 @@ if ($player['health'] <= 0) {
         'enemy_base_damage' => 0,
         'player_defense' => 0,
         'enemy_defense_blocked' => 0,
-        'vampire_heal' => $vampireHeal ?? 0,
+        'vampire_heal' => 0,
         'defense_multiplier_active' => ($upgrades[22] ?? 0) > 0,
         'stats' => $stats,
         'message' => 'You died! Respawned at level 1.'
@@ -94,44 +81,44 @@ if ($player['health'] <= 0) {
     exit;
 }
 
+// Enemy defeated branch
 if ($newEnemyHealth <= 0) {
     // XP Boost (id 17) - Gain 25% more XP per level
-    $xpBoostLevel = $upgrades[17] ?? 0;
+    $xpBoostLevel = (int) ($upgrades[17] ?? 0);
     $xpMultiplier = 1 + ($xpBoostLevel * 0.25);
-    $xpGain = floor(($enemy['xp'] ?? 10) * $xpMultiplier);
+    $xpGain = (int) floor(((int) ($enemy['xp'] ?? 10)) * $xpMultiplier);
 
-    $newExp = $player['experience'] + $xpGain;
+    $newExp = (int) $player['experience'] + $xpGain;
     $newLevel = getLevelByXp($newExp);
     $maxPlayerLevel = getMaxPlayerLevel();
 
     // Double Level Up (id 18)
     $doubleLevelActive = ($upgrades[18] ?? 0) > 0;
-    $doubleLevelTriggered = $doubleLevelActive && $newLevel > $player['level'];
+    $doubleLevelTriggered = $doubleLevelActive && $newLevel > (int) $player['level'];
 
     if ($doubleLevelTriggered) {
         $newLevel = min($newLevel + 1, $maxPlayerLevel);
     }
 
+    $newMaxHealth = (int) $player['max_health'];
+    $newHealth    = (int) $player['health'];
+    $newDamage    = (int) $player['damage'];
+
     // Apply level-up stat bonuses
-    if ($newLevel > $player['level']) {
+    if ($newLevel > (int) $player['level']) {
         $levelData = getLevelData()[$newLevel] ?? null;
         if ($levelData) {
-            $damageBonus = $levelData['damageBonus'] ?? 0;
-            $healthBonus = $levelData['healthBonus'] ?? 0;
+            $damageBonus = (int) $levelData['damageBonus'] ?? 0;
+            $healthBonus = (int) $levelData['healthBonus'] ?? 0;
 
-            $stmt = $pdo->prepare("
-                UPDATE click_data 
-                SET damage = damage + ?,
-                    max_health = max_health + ?,
-                    health = health + ?
-                WHERE user_id = ?
-            ");
-            $stmt->execute([$damageBonus, $healthBonus, $healthBonus, $user_id]);
+            $newDamage += $damageBonus;
+            $newMaxHealth += $healthBonus;
+            $newHealth = min($newHealth + $healthBonus, $newEnemyHealth);
         }
     }
 
-    $coins = $player['coins'] + $enemy['reward'];
-    $total_coins = $player['total_coins'] + $enemy['reward'];
+    $coins = (int) $player['coins'] + (int) $enemy['reward'];
+    $total_coins = (int) $player['total_coins'] + (int) $enemy['reward'];
 
     $nextLevel = min($enemy_level + 1, getMaxEnemyLevel());
     $nextEnemy = getEnemyByLevel($nextLevel);
@@ -139,14 +126,16 @@ if ($newEnemyHealth <= 0) {
     if ($enemy_level >= getMaxEnemyLevel()) {
         $nextLevel = getMaxEnemyLevel();
         $nextEnemy = getEnemyByLevel($nextLevel);
-        $nextEnemyHealth = $nextEnemy['health'];
-    } else {
-        $nextEnemyHealth = $nextEnemy['health'];
     }
 
+    $nextEnemyHealth = (int) $nextEnemy['health'];
+
     $stmt = $pdo->prepare("
-        UPDATE click_data 
-        SET enemy_health = ?,
+        UPDATE click_data
+        SET damage = ?,
+            max_health = ?,
+            health = ?,
+            enemy_health = ?,
             enemy_max_health = ?,
             current_enemy = ?,
             enemy_damage = ?,
@@ -165,15 +154,18 @@ if ($newEnemyHealth <= 0) {
         WHERE user_id = ?
     ");
     $stmt->execute([
+        $newDamage,
+        $newMaxHealth,
+        $newHealth,
         $nextEnemyHealth,
-        $nextEnemy['health'],
+        (int) $nextEnemy['health'],
         $nextEnemy['name'],
-        $nextEnemy['damage'],
-        $nextEnemy['defense'] ?? 0,
-        $nextEnemy['reward'],
-        $nextEnemy['critChance'] ?? 0,
-        $nextEnemy['critMultiplier'] ?? 1.5,
-        $nextEnemy['xp'] ?? 10,
+        (int) $nextEnemy['damage'],
+        (int) ($nextEnemy['defense'] ?? 0),
+        (int) $nextEnemy['reward'],
+        (int) ($nextEnemy['critChance'] ?? 0),
+        (float) ($nextEnemy['critMultiplier'] ?? 1.5),
+        (int) ($nextEnemy['xp'] ?? 10),
         $nextLevel,
         $coins,
         $total_coins,
@@ -182,19 +174,9 @@ if ($newEnemyHealth <= 0) {
         $user_id
     ]);
 
-    $stmt = $pdo->prepare("SELECT current_enemy_level, enemy_health FROM click_data WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $verify = $stmt->fetch();
-
-    if ($verify['enemy_health'] <= 0) {
-        $stmt = $pdo->prepare("UPDATE click_data SET enemy_health = 100 WHERE user_id = ?");
-        $stmt->execute([$user_id]);
-    }
-
     $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
     $stmt->execute([$user_id]);
-    $stats = $stmt->fetch();
-    $stats = enrichClickStats($stats);
+    $stats = enrichClickStats($stmt->fetch());
 
     echo json_encode([
         'success' => true,
@@ -204,11 +186,11 @@ if ($newEnemyHealth <= 0) {
         'enemy_crit' => $enemyIsCrit,
         'enemy_damage_dealt' => $damageDealt,
         'enemy_base_damage' => $enemyFinalDamage,
-        'player_defense' => $player['defense'],
+        'player_defense' => (int) $player['defense'],
         'enemy_defense_blocked' => $enemyDefenseBlocked,
-        'vampire_heal' => $vampireHeal ?? 0,
-        'xp_gain' => $xpGain ?? 0,
-        'xp_boost_active' => ($upgrades[17] ?? 0) > 0,
+        'vampire_heal' => $vampireHeal,
+        'xp_gain' => $xpGain,
+        'xp_boost_active' => $xpBoostLevel > 0,
         'double_level_active' => $doubleLevelActive,
         'double_level_triggered' => $doubleLevelTriggered,
         'defense_multiplier_active' => ($upgrades[22] ?? 0) > 0,
@@ -218,8 +200,33 @@ if ($newEnemyHealth <= 0) {
 }
 
 // ✅ Normal attack with vampire heal
-$newPlayerHealth = $player['health'] - $damageDealt + $vampireHeal;
-$newPlayerHealth = min($newPlayerHealth, $player['max_health']);
+$newPlayerHealth = (int) $player['health'] - $damageDealt + $vampireHeal;
+$newPlayerHealth = max(0, min($newPlayerHealth, (int) $player['max_health']));
+
+if ($newPlayerHealth <= 0) {
+    respawnPlayer($pdo, $user_id);
+
+    $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+    $stats = enrichClickStats($stmt->fetch());
+
+    echo json_encode([
+        'success' => true,
+        'defeated' => false,
+        'damage' => $finalDamage,
+        'crit' => $isCrit,
+        'enemy_crit' => $enemyIsCrit,
+        'enemy_damage_dealt' => $damageDealt,
+        'enemy_base_damage' => $enemyFinalDamage,
+        'player_defense' => (int) $player['defense'],
+        'enemy_defense_blocked' => $enemyDefenseBlocked,
+        'vampire_heal' => $vampireHeal,
+        'defense_multiplier_active' => ($upgrades[22] ?? 0) > 0,
+        'stats' => $stats,
+        'message' => 'You died! Respawned at level 1.'
+    ]);
+    exit;
+}
 
 $stmt = $pdo->prepare("
     UPDATE click_data 
@@ -233,15 +240,14 @@ $stmt = $pdo->prepare("
 $stmt->execute([
     $enemy['name'],
     $newEnemyHealth,
-    $enemy['health'],
+    (int) $enemy['health'],
     $newPlayerHealth,
     $user_id
 ]);
 
 $stmt = $pdo->prepare("SELECT * FROM click_data WHERE user_id = ?");
 $stmt->execute([$user_id]);
-$stats = $stmt->fetch();
-$stats = enrichClickStats($stats);
+$stats = enrichClickStats($stmt->fetch());
 
 echo json_encode([
     'success' => true,
@@ -251,9 +257,9 @@ echo json_encode([
     'enemy_crit' => $enemyIsCrit,
     'enemy_damage_dealt' => $damageDealt,
     'enemy_base_damage' => $enemyFinalDamage,
-    'player_defense' => $player['defense'],
+    'player_defense' => (int) $player['defense'],
     'enemy_defense_blocked' => $enemyDefenseBlocked,
-    'vampire_heal' => $vampireHeal ?? 0,
+    'vampire_heal' => $vampireHeal,
     'defense_multiplier_active' => ($upgrades[22] ?? 0) > 0,
     'stats' => $stats
 ]);
