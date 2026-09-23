@@ -16,7 +16,7 @@ if (!$user_id) {
     exit;
 }
 
-if ($_SESSION['user_id'] === $user_id) {
+if ((int) $_SESSION['user_id'] === (int) $user_id) {
     header('Location: profile.php');
     exit;
 }
@@ -25,13 +25,13 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $profile_user = $stmt->fetch();
 
-logAction($_SESSION['username'] . ' Viewed ' . $profile_user['username'] . '\'s profile.');
-
 if (!$profile_user) {
     setFlashMessage('User not found.', 'error');
     header('Location: index.php');
     exit;
 }
+
+logAction($_SESSION['username'] . ' Viewed ' . $profile_user['username'] . '\'s profile.');
 
 $stmt = $pdo->prepare("
     SELECT 
@@ -51,19 +51,24 @@ $stmt = $pdo->prepare("
     WHERE p.archived = 0 AND p.user_id = ?
 ");
 $stmt->execute([$profile_user['id']]);
-$user_likes = $stmt->fetchColumn();
+$user_likes = (int) $stmt->fetchColumn();
 
 $stmt = $pdo->prepare("SELECT score, points, total_points, time_played FROM whack_scores WHERE user_id = ?");
 $stmt->execute([$profile_user['id']]);
-$user_whack_data = $stmt->fetch();
+$user_whack_data = $stmt->fetch() ?: [
+    'score' => 0,
+    'points' => 0,
+    'total_points' => 0,
+    'time_played' => 0,
+];
 
 $stmt = $pdo->prepare("SELECT COUNT(following_id) FROM follows WHERE following_id = ?");
 $stmt->execute([$profile_user['id']]);
-$user_followers = $stmt->fetchColumn();
+$user_followers = (int) $stmt->fetchColumn();
 
 $stmt = $pdo->prepare("SELECT COUNT(follower_id) FROM follows WHERE follower_id = ?");
 $stmt->execute([$profile_user['id']]);
-$user_following = $stmt->fetchColumn();
+$user_following = (int) $stmt->fetchColumn();
 ?>
 
 <!DOCTYPE html>
@@ -74,11 +79,6 @@ $user_following = $stmt->fetchColumn();
     <title>Profile | Skia</title>
     <link rel="stylesheet" href="../css/general.css?v=<?= filemtime(__DIR__ . '/../css/general.css') ?>">
     <link rel="stylesheet" href="../css/profile.css?v=<?= filemtime(__DIR__ . '/../css/profile.css') ?>">
-
-    <!-- Cropper.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
-    <!-- Cropper.js JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 </head>
 
 <body>
@@ -99,7 +99,7 @@ $user_following = $stmt->fetchColumn();
                     </svg>
                     <?php $unread = getUnreadCount($_SESSION['user_id']);
                     if ($unread > 0): ?>
-                        <span class="notification-badge"><?= $unread ?></span>
+                        <span class="notification-badge"><?= (int) $unread ?></span>
                     <?php endif; ?>
                 </button>
 
@@ -116,12 +116,12 @@ $user_following = $stmt->fetchColumn();
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
                             <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                data-id="<?= $notif['id'] ?>"
+                                data-id="<?= (int) $notif['id'] ?>"
                                 data-link="<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>">
-                                <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
-                                <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
+                                <div class="title"><?= htmlspecialchars($notif['title'] ?? '') ?></div>
+                                <div class="message"><?= htmlspecialchars($notif['message'] ?? '') ?></div>
                                 <div class="meta">
-                                    <span class="sender-badge <?= $notif['sender_type'] ?>">
+                                    <span class="sender-badge <?= $notif['sender_type'] ?? '' ?>">
                                         <?php
                                         $senderLabels = [
                                             'system' => '🤖 System',
@@ -129,10 +129,10 @@ $user_following = $stmt->fetchColumn();
                                             'admin' => '🛡️ Admin',
                                             'user' => '👤 User'
                                         ];
-                                        echo $senderLabels[$notif['sender_type']] ?? 'System';
+                                        echo $senderLabels[$notif['sender_type'] ?? ''] ?? 'System';
                                         ?>
                                     </span>
-                                    <span class="type-badge <?= $notif['type'] ?>"><?= htmlspecialchars($notif['type']) ?></span>
+                                    <span class="type-badge <?= $notif['type'] ?? '' ?>"><?= htmlspecialchars($notif['type'] ?? '') ?></span>
                                     <span class="time"><?= timeAgo($notif['created_at']) ?></span>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ $user_following = $stmt->fetchColumn();
                 <div class="left-content">
                     <div class="avatar-container avatar-sm">
                         <?= getUserAvatar($_SESSION['user_id']) ?>
-                        <div class="status status-offline" data-user="<?= $_SESSION['user_id'] ?>"></div>
+                        <div class="status status-offline" data-user="<?= (int) $_SESSION['user_id'] ?>"></div>
                     </div>
                     <div class="profile-info">
                         <span class="profile-name"><?= htmlspecialchars(getDisplayName($_SESSION['name'] ?? '')) ?></span>
@@ -283,7 +283,7 @@ $user_following = $stmt->fetchColumn();
             if ($flash): ?>
                 <div class="flash-wrapper">
                     <div class="flash-message <?= $flash['type'] ?>">
-                        <?= htmlspecialchars($flash['message']) ?>
+                        <?= htmlspecialchars($flash['message'] ?? '') ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -297,23 +297,23 @@ $user_following = $stmt->fetchColumn();
                     <div class="wrapper">
                         <span class="user-name">
                             <span class="username">
-                                <?= htmlspecialchars($profile_user['username']) ?>
+                                <?= htmlspecialchars($profile_user['username'] ?? '') ?>
                             </span>
                             <span class="name">
                                 (<?= htmlspecialchars(!empty($profile_user['name']) ? $profile_user['name'] : 'name not set') ?>)
                             </span>
                         </span>
-                        <span class="user-role"><?= htmlspecialchars($profile_user['role']) ?></span>
+                        <span class="user-role"><?= htmlspecialchars($profile_user['role'] ?? '') ?></span>
                     </div>
 
                     <span class="user-email">
-                        <?= htmlspecialchars($profile_user['email']) ?>
+                        <?= htmlspecialchars($profile_user['email'] ?? '') ?>
                     </span>
 
                     <span class="user-stats">
-                        <span><?= htmlspecialchars($user_likes) ?></span> Likes
-                        <span><?= htmlspecialchars($user_followers) ?></span> Followers
-                        <span><?= htmlspecialchars($user_following) ?></span> Following
+                        <span><?= $user_likes ?></span> Likes
+                        <span><?= $user_followers ?></span> Followers
+                        <span><?= $user_following ?></span> Following
                     </span>
 
                     <span class="user-bio"><?= htmlspecialchars(!empty($profile_user['bio']) ? $profile_user['bio'] : 'no bio yet...') ?></span>
@@ -323,11 +323,11 @@ $user_following = $stmt->fetchColumn();
                 // Check if current user is following this profile user
                 $stmt = $pdo->prepare("SELECT COUNT(*) FROM follows WHERE follower_id = ? AND following_id = ?");
                 $stmt->execute([$_SESSION['user_id'], $profile_user['id']]);
-                $is_following = $stmt->fetchColumn() > 0;
+                $is_following = (int) $stmt->fetchColumn() > 0;
                 ?>
 
-                <button onclick="toggleFollow(<?= $profile_user['id'] ?>)"
-                    data-user="<?= $profile_user['id'] ?>"
+                <button onclick="toggleFollow(<?= (int) $profile_user['id'] ?>)"
+                    data-user="<?= (int) $profile_user['id'] ?>"
                     class="follow-btn <?= $is_following ? 'following' : '' ?>">
                     <?= $is_following ? 'Following' : 'Follow' ?>
                 </button>
@@ -339,7 +339,7 @@ $user_following = $stmt->fetchColumn();
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">
-                            <?= htmlspecialchars($user_whack_data['score'] ?? 0) ?>
+                            <?= (int) ($user_whack_data['score'] ?? 0) ?>
                         </div>
                         <div class="stat-label">
                             High Score
@@ -348,7 +348,7 @@ $user_following = $stmt->fetchColumn();
 
                     <div class="stat-card">
                         <div class="stat-number">
-                            <?= htmlspecialchars($user_whack_data['total_points'] ?? 0) ?>
+                            <?= (int) ($user_whack_data['total_points'] ?? 0) ?>
                         </div>
                         <div class="stat-label">
                             Total Points
@@ -357,7 +357,7 @@ $user_following = $stmt->fetchColumn();
 
                     <div class="stat-card">
                         <div class="stat-number">
-                            <?= htmlspecialchars(formatTime($user_whack_data['points']) ?? 0) ?>
+                            <?= formatTime((int) ($user_whack_data['points'] ?? 0)) ?>
                         </div>
                         <div class="stat-label">
                             Current Points
@@ -371,18 +371,18 @@ $user_following = $stmt->fetchColumn();
                     <h3>Their Posts</h3>
                     <?php foreach ($user_posts as $post): ?>
                         <div class="user-post-card">
-                            <p><?= nl2br(htmlspecialchars($post['content'])) ?></p>
+                            <p><?= nl2br(htmlspecialchars($post['content'] ?? '')) ?></p>
                             <div class="user-post-meta">
                                 <div class="wrapper">
                                     <span class="post-date"><?= timeAgo($post['created_at']) ?></span>
                                     <?php if ($post['updated_at'] && strtotime($post['updated_at']) > strtotime($post['created_at'])): ?>
                                         <span class="post-edited">(edited)</span>
                                     <?php endif; ?>
-                                    <span class="post-likes">❤️ <?= $post['like_count'] ?></span>
+                                    <span class="post-likes">❤️ <?= (int) $post['like_count'] ?></span>
                                 </div>
 
                                 <div class="link">
-                                    <a href="../posts/index.php?scroll_to=<?= $post['id'] ?>" class="view-link">View Post →</a>
+                                    <a href="../posts/index.php?scroll_to=<?= (int) $post['id'] ?>" class="view-link">View Post →</a>
                                 </div>
                             </div>
                         </div>
