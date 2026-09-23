@@ -16,11 +16,12 @@ aside {
 main {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: safe center;
   align-items: center;
   padding: 20px;
   overflow-y: auto;
   grid-area: main;
+  min-height: 0; 
 }
 
 .form-section {
