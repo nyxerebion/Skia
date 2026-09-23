@@ -16,8 +16,8 @@ validateCSRFToken($csrf_token);
 
 // ✅ Get old name from database
 $stmt = $pdo->prepare("SELECT name FROM users WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$old_name = $stmt->fetchColumn();
+$stmt->execute([(int) $_SESSION['user_id']]);
+$old_name = $stmt->fetchColumn() ?: '';
 
 $errors = [];
 
@@ -30,7 +30,7 @@ $stmt = $pdo->prepare("
     ORDER BY name_updated_at DESC 
     LIMIT 1
 ");
-$stmt->execute([$_SESSION['user_id']]);
+$stmt->execute([(int) $_SESSION['user_id']]);
 $last_change = $stmt->fetchColumn();
 
 if ($last_change && strtotime($last_change) > strtotime('-24 hours')) {
@@ -52,9 +52,14 @@ if (!empty($errors)) {
     exit;
 }
 
+if ($new_name === $old_name) {
+    echo json_encode(['success' => false, 'errors' => ["This is already your current display name."]]);
+    exit;
+}
+
 // ✅ Update name
 $stmt = $pdo->prepare("UPDATE users SET name = ? WHERE id = ?");
-$stmt->execute([$new_name, $_SESSION['user_id']]);
+$stmt->execute([$new_name, (int) $_SESSION['user_id']]);
 
 // ✅ Log to name_history
 $stmt = $pdo->prepare("
@@ -68,17 +73,17 @@ $stmt = $pdo->prepare("
     ) VALUES (?, ?, ?, 'name', NOW(), ?)
 ");
 $stmt->execute([
-    $_SESSION['user_id'],
+    (int) $_SESSION['user_id'],
     $old_name,
     $new_name,
-    $_SESSION['user_id']
+    (int) $_SESSION['user_id']
 ]);
 
 addNotification(
-    $_SESSION['user_id'],
+    (int) $_SESSION['user_id'],
     "success",
     "Name changed successfully!",
-    "Your name has been updated from " . htmlspecialchars($old_name) . " to " . htmlspecialchars($new_name) . ".",
+    "Your name has been updated from " . $old_name . " to " . $new_name . ".",
     SITE_URL . "/pages/profile.php",
     "system",
     null
