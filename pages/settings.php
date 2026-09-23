@@ -63,9 +63,9 @@ $bio_updated_at = $stmt->fetchColumn();
     <link rel="stylesheet" href="../css/settings.css?v=<?= filemtime(__DIR__ . '/../css/settings.css') ?>">
 
     <!-- Cropper.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+    <link rel="stylesheet" href="../css/vendor/cropper.min.css?v=<?= filemtime(__DIR__ . '/../css/vendor/cropper.min.css') ?>">
     <!-- Cropper.js JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="../js/vendor/cropper.min.js?v=<?= filemtime(__DIR__ . '/../js/vendor/cropper.min.js') ?>"></script>
 </head>
 
 <body>
