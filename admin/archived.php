@@ -11,11 +11,12 @@ if (!isAdmin()) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['restore_post'])) {
     validateCSRFToken($_POST['csrf_token'] ?? '');
 
+    $id = (int) $_POST['id'];
+
     $stmt = $pdo->prepare("SELECT user_id FROM posts WHERE id = ?");
     $stmt->execute([$id]);
     $post = $stmt->fetch();
 
-    $id = (int)$_POST['id'];
     $stmt = $pdo->prepare("
         UPDATE posts 
         SET archived = 0, 

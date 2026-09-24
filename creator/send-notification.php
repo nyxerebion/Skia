@@ -6,7 +6,7 @@ if (!isCreator()) {
     die('Access denied.');
 }
 
-validateCSRFToken($_POST['csrf_token' ?? '']);
+validateCSRFToken($_POST['csrf_token'] ?? '');
 
 $type = $_POST['type'] ?? 'info';
 $title = trim($_POST['title'] ?? '');

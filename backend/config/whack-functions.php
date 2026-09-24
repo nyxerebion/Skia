@@ -12,10 +12,10 @@ function getWhackPlayer($user_id)
         $stmt = $pdo->prepare("
             INSERT INTO whack_scores (
                 user_id, score, points, total_points,
-                time_played, last_played, shop_upgrades
+                time_played, last_played
             ) VALUES (
                 ?, 0, 0, 0,
-                0, NOW(), '{}'
+                0, NOW()
             )
         ");
 

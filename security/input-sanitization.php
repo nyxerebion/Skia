@@ -1,7 +1,7 @@
 <?php
 function sanitizeString($input)
 {
-    return trim(htmlspecialchars(strip_tags($input), ENT_QUOTES, 'UTF-8'));
+    return trim(strip_tags($input));
 }
 
 /**
@@ -71,6 +71,6 @@ function sanitizeUsername($input)
  */
 function sanitizeTextarea($input, $max = 1000)
 {
-    $clean = strip_tags($input, '<p><br><strong><em><ul><li>'); // Allow safe tags
+    $clean = strip_tags($input);
     return substr(trim($clean), 0, $max);
 }

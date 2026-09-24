@@ -90,8 +90,8 @@ $player = getClickPlayer($_SESSION['user_id']);
                         <span> <span id="playerDamage"><?= $player['damage'] ?? 2 ?></span> DMG</span>
                         <span> <span id="playerDefense"><?= $player['defense'] ?? 0 ?></span> DEF</span>
                         <span>👆 <span id="clickPower"><?= $player['click_power'] ?? 0 ?></span> CP</span>
-                        <span>🎯 <span id="playerCritChance"><?= $player['crit_chance'] ?? 0 ?></span> CRIT</span>
-                        <span>💥 <span id="playerCritMultiplier"><?= $player['crit_multiplier'] ?? 0 ?></span> MULT</span>
+                        <span>🎯 <span id="playerCritChance"><?= $player['critical_chance'] ?? 0 ?></span> CRIT</span>
+                        <span>💥 <span id="playerCritMultiplier"><?= $player['critical_multiplier'] ?? 0 ?></span> MULT</span>
                     </div>
 
                     <div class="combat-buttons">

@@ -25,7 +25,7 @@ $total_clicks = (int)($input['total_clicks'] ?? 0);
 $user_id = $_SESSION['user_id'];
 
 $stmt = $pdo->prepare("
-    UPDAE click_data
+    UPDATE click_data
     SET clicks = ?, total_clicks = ?, last_played = NOW()
     WHERE user_id = ?
 ");

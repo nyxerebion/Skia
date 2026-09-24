@@ -92,7 +92,7 @@ function handlePost() {
   const contentVal = textareaEl.value.trim();
 
   if (!contentVal) {
-    toast("Content cannot be empty", "errors");
+    toast("Content cannot be empty", "error");
     return;
   }
   if (!canProceed) {
@@ -121,7 +121,7 @@ function handlePost() {
     .then((data) => {
       if (data.success) {
         toast(data.message || "Post created!", "success");
-        content.disabled = true;
+        textareaEl.disabled = true;
         setTimeout(() => {
           const currentPage = window.location.pathname;
           const hashedId = data.hashed_id ?? "";
@@ -133,7 +133,7 @@ function handlePost() {
     })
     .catch(() => {
       console.error("Fetch error:", error);
-      toast("Netword error. Please try again.", "error");
+      toast("Network error. Please try again.", "error");
     })
     .finally(() => {
       if (submitBtn) {

@@ -357,7 +357,7 @@ $user_following = (int) $stmt->fetchColumn();
 
                     <div class="stat-card">
                         <div class="stat-number">
-                            <?= formatTime((int) ($user_whack_data['points'] ?? 0)) ?>
+                            <?= number_format((int) ($user_whack_data['points'] ?? 0)) ?>
                         </div>
                         <div class="stat-label">
                             Current Points
