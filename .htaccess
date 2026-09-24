@@ -1,3 +1,13 @@
-# Custom 404 Not Found Error Page
-
+# 404 handler
 ErrorDocument 404 https://skia.unaux.com/404.php
+
+# Block direct web access to non-public directories
+RedirectMatch 404 ^/(backend|core|database|security)(/|$)
+
+# Block SQL and common sensitive files
+<FilesMatch "\.(sql|log|env|ini|json|lock|md|bak|old|swp)$">
+    Require all denied
+</FilesMatch>
+
+# Block dotfiles except .well-known (needed by some hosts for ACME)
+RedirectMatch 404 /\.(?!well-known/).*
