@@ -62,6 +62,24 @@ Security was treated as a first-class concern throughout the project.
 - Activity logging and audit trails for account changes (name, username, bio, avatar history)
 - Unified error responses to prevent account enumeration
 
+---git add README.md
+git commit -m "Add security notes to README"
+git push
+
+## Security Notes
+
+### Account enumeration in login
+
+The login flow initially returned "Username doesn't exist" for unknown users and "Invalid password" for known users. An attacker could use this to enumerate valid usernames. Fixed by returning a single "Invalid credentials" error and recording a rate-limit attempt in both cases. See `security/login.php`.
+
+### Rate limit cleared on success
+
+The follow endpoint cleared its rate-limit counter after every successful request, so a user who ever succeeded could exceed the intended limit. Fixed by removing the `clearRateLimit` calls from the success paths. See `api/follow.php`.
+
+### Lost updates on concurrent attacks
+
+Two tabs attacking the same enemy could both read the same health, compute damage, and one write would overwrite the other. Fixed by wrapping the read-modify-write in a transaction with `SELECT ... FOR UPDATE`. See `api/games/click-attack.php`.
+
 ---
 
 ## Features
