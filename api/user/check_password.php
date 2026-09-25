@@ -14,6 +14,9 @@ $pass_input = $input['current_password'] ?? '';
 
 validateCSRFToken($csrf_token);
 
+$ip = getRealIP();
+checkRateLimit($pdo, $ip, 'check_password', 30, 15);
+
 $errors = [];
 
 if (empty($pass_input)) {
@@ -27,6 +30,7 @@ if (empty($errors)) {
 
     if (!password_verify($pass_input, $hashed_current_pass)) {
         $errors[] = 'Current password is incorrect';
+        recordRateLimitAttempt($pdo, $ip, 'check_password');
     }
 }
 
