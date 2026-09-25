@@ -2,7 +2,8 @@
 ob_start();
 require_once '../core/bootstrap.php';
 
-// Only handle JSON requests
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'error' => 'Method not allowed']);
     exit;
@@ -10,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $csrf_token = $input['csrf_token'] ?? '';
-$username = $input['username'] ?? '';
-$email = $input['email'] ?? '';
+$username = trim($input['username'] ?? '');
+$email = trim($input['email'] ?? '');
 $password = $input['password'] ?? '';
 $confirm_password = $input['confirm_password'] ?? '';
 
@@ -25,12 +26,48 @@ validateCSRFToken($csrf_token);
 $ip = getRealIP();
 checkRateLimit($pdo, $ip, 'register', 5, 15);
 
-// Server-side validation (fallback)
+// Server-side validation
 $errors = [];
-if (empty($username)) $errors[] = 'Username is required';
-if (empty($email)) $errors[] = 'Email is required';
-if (empty($password)) $errors[] = 'Password is required';
-if ($password !== $confirm_password) $errors[] = 'Passwords do not match';
+
+if ($username === '') {
+    $errors[] = 'Username is required';
+} else {
+    if (strlen($username) < 4 || strlen($username) > 12) {
+        $errors[] = 'Username must be 4-12 characters';
+    }
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $errors[] = 'Username can only contain letters, numbers, and underscores';
+    }
+    if (substr_count($username, '_') > 1) {
+        $errors[] = 'Username can have at most one underscore';
+    }
+    if (preg_match_all('/[a-zA-Z]/', $username) < 2) {
+        $errors[] = 'Username must contain at least 2 letters';
+    }
+    if (preg_match_all('/[0-9]/', $username) < 1) {
+        $errors[] = 'Username must contain at least 1 number';
+    }
+}
+
+if ($email === '') {
+    $errors[] = 'Email is required';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors[] = 'Invalid email format';
+} elseif (strlen($email) > 100) {
+    $errors[] = 'Email must be at most 100 characters';
+}
+
+if ($password === '') {
+    $errors[] = 'Password is required';
+} elseif (strlen($password) < 6) {
+    $errors[] = 'Password must be at least 6 characters';
+} elseif (strlen($password) > 100) {
+    $errors[] = 'Password must be at most 100 characters';
+}
+
+if ($password !== $confirm_password) {
+    $errors[] = 'Passwords do not match';
+}
 
 if (!empty($errors)) {
     recordRateLimitAttempt($pdo, $ip, 'register');
@@ -61,7 +98,8 @@ try {
     $stmt = $pdo->prepare("UPDATE users SET remember_token = ? WHERE id = ?");
     $stmt->execute([$hashed_token, $user_id]);
 
-    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] === 443;
+    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['SERVER_PORT'] ?? '') === '443';
     setcookie('remember_token', $token, time() + (30 * 24 * 60 * 60), '/', '', $secure, true);
     setcookie('user_id', $user_id, time() + (30 * 24 * 60 * 60), '/', '', $secure, true);
 
