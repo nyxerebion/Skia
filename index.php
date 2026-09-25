@@ -112,8 +112,7 @@ $top_points = $stmt->fetch();
                         <div class="notification-empty">No notifications</div>
                     <?php else: ?>
                         <?php foreach ($notifications as $notif): ?>
-                            <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>"
-                                onclick="markRead(<?= $notif['id'] ?>, '<?= htmlspecialchars($notif['link'] ?? '', ENT_QUOTES) ?>')">
+                            <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>">
                                 <div class="title"><?= htmlspecialchars($notif['title']) ?></div>
                                 <div class="message"><?= htmlspecialchars($notif['message']) ?></div>
                                 <div class="meta">

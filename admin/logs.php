@@ -100,8 +100,8 @@ $actions = $pdo->query("SELECT DISTINCT action FROM rate_limits ORDER BY action"
 
     <?php if (count($history) > 0): ?>
         <p><strong>Total records:</strong> <?php echo count($history); ?></p>
-        <table>
-            <div class="wrapper">
+        <div class="wrapper">
+            <table>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -130,8 +130,8 @@ $actions = $pdo->query("SELECT DISTINCT action FROM rate_limits ORDER BY action"
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
-            </div>
-        </table>
+            </table>
+        </div>
     <?php else: ?>
         <p>No archived rate limit records found.</p>
     <?php endif; ?>

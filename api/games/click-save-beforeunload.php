@@ -6,6 +6,7 @@ if (!checkLogin()) {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
+
 validateCSRFToken($input['csrf_token'] ?? '');
 
 $clicks = (int)($input['clicks'] ?? 0);
