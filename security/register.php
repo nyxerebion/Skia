@@ -1,11 +1,6 @@
 <?php
 // Register.php
 require_once '../core/bootstrap.php';
-
-$prefill = $_SESSION['register_prefill'] ?? null;
-unset($_SESSION['register_prefill']);
-$prefill_username = $prefill && !$prefill['is_email'] ? $prefill['value'] : '';
-$prefill_email = $prefill && $prefill['is_email'] ? $prefill['value'] : '';
 ?>
 
 <!DOCTYPE html>
@@ -60,14 +55,14 @@ $prefill_email = $prefill && $prefill['is_email'] ? $prefill['value'] : '';
                     minlength="3" maxlength="20"
                     pattern="[a-zA-Z0-9_]+"
                     title="Only letters, numbers, underscores. 3-20 characters."
-                    value="<?= htmlspecialchars($prefill_username ?? $_POST['username'] ?? '') ?>">
+                    value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
 
                 <label for="email">Email:</label>
                 <input type="email" id="emailField" name="email"
                     placeholder="Email" required
                     maxlength="100"
                     title="Enter a valid email address"
-                    value="<?= htmlspecialchars($prefill_email ?? $_POST['email'] ?? '') ?>">
+                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
 
                 <label for="passwordField">Create Password:</label>
                 <div class="password-wrapper">

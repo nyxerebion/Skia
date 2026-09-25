@@ -2,8 +2,8 @@
 ob_start();
 require_once '../core/bootstrap.php';
 
-$is_local = ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1');
-
+$is_local = ($_SERVER['SERVER_NAME'] ?? '') === 'localhost'
+         || ($_SERVER['SERVER_ADDR'] ?? '') === '127.0.0.1';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -54,15 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             logAction("User logged in: " . $user['username']);
             header("Location: ../index.php");
             exit();
-        } elseif (!$user) {
-            $is_email = filter_var($login, FILTER_VALIDATE_EMAIL);
-            $field = $is_email ? 'email' : 'username';
-            setFlashMessage(htmlspecialchars($login) . ' doesn\'t exist yet. Redirected to registration', 'warning');
-            $_SESSION['register_prefill'] = ['value' => $login, 'is_email' => $is_email];
-            header('Location: register.php');
-            exit;
         } else {
-            $error = 'Invalid username/email or password!';
+            $error = 'Invalid credentials.';
             recordRateLimitAttempt($pdo, $ip, 'login');
         }
     } catch (PDOException $e) {
