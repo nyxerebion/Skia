@@ -16,7 +16,6 @@ function sendEmail($to, $subject, $body)
         $mail->Password = $_ENV['SMTP_PASSWORD'] ?? '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $_ENV['SMTP_PORT'] ?? 587;
-        $mail->SMTPOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];
         $mail->setFrom($_ENV['SMTP_FROM'] ?? 'skia.practice@gmail.com', $_ENV['SMTP_NAME'] ?? 'Skia');
         $mail->addAddress($to);
         $mail->isHTML(true);
