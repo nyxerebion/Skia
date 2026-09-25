@@ -17,9 +17,7 @@ $stmt = $pdo->prepare("
         u.avatar, 
         u.role, 
         u.last_activity,
-        (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS followers,
-        0 AS is_following,
-        0 AS is_self
+        (SELECT COUNT(*) FROM follows WHERE following_id = u.id) AS followers
     FROM users u
     WHERE u.last_activity >= (NOW() - INTERVAL 1 MINUTE)
     ORDER BY u.last_activity DESC
@@ -27,31 +25,30 @@ $stmt = $pdo->prepare("
 $stmt->execute();
 $onlineUsers = $stmt->fetchAll();
 
-if ($user_id) {
-    foreach ($onlineUsers as &$user) {
-        $stmt2 = $pdo->prepare("SELECT COUNT(*) FROM follows WHERE follower_id = ? AND following_id = ?");
-        $stmt2->execute([$user_id, $user['id']]);
-        $is_following = (int)$stmt2->fetchColumn() > 0;
-
-        $user['avatar_url'] = !empty($user['avatar'])
-            ? SITE_URL . '/uploads/avatars/' . $user['avatar']
-            : null;
-        $user['hashed_id'] = $hashids->encode($user['id']);
-        $user['followers'] = (int)($user['followers'] ?? 0);
-        $user['is_following'] = $is_following;
-        $user['is_self'] = (int)($user['id'] == $user_id) ? 1 : 0;
-    }
-} else {
-    foreach ($onlineUsers as &$user) {
-        $user['avatar_url'] = !empty($user['avatar'])
-            ? SITE_URL . '/uploads/avatars/' . $user['avatar']
-            : null;
-        $user['hashed_id'] = $hashids->encode($user['id']);
-        $user['followers'] = (int)($user['followers'] ?? 0);
-        $user['is_following'] = false;
-        $user['is_self'] = false;
-    }
+// Prefetch follow relationships in one query
+$followingIds = [];
+if ($user_id && !empty($onlineUsers)) {
+    $ids = array_column($onlineUsers, 'id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = $pdo->prepare("
+        SELECT following_id 
+        FROM follows 
+        WHERE follower_id = ? AND following_id IN ($placeholders)
+    ");
+    $stmt->execute(array_merge([$user_id], $ids));
+    $followingIds = array_flip(array_column($stmt->fetchAll(), 'following_id'));
 }
+
+foreach ($onlineUsers as &$user) {
+    $user['avatar_url'] = !empty($user['avatar'])
+        ? SITE_URL . '/uploads/avatars/' . $user['avatar']
+        : null;
+    $user['hashed_id'] = $hashids->encode($user['id']);
+    $user['followers'] = (int)($user['followers'] ?? 0);
+    $user['is_following'] = isset($followingIds[$user['id']]);
+    $user['is_self'] = ($user_id && (int)$user['id'] === (int)$user_id);
+}
+unset($user);
 
 echo json_encode([
     'success' => true,
