@@ -353,7 +353,7 @@ $pending_count = $stmt->fetchColumn();
         <section class="stats">
             <div class="stat-card">
                 <div class="stat-number">
-                    <?= htmlspecialchars(count($users)) ?>
+                    <?= htmlspecialchars($total_users ?? count($users)) ?>
                 </div>
                 <div class="stat-label">
                     Total Users
