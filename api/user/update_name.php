@@ -60,6 +60,7 @@ if ($new_name === $old_name) {
 // ✅ Update name
 $stmt = $pdo->prepare("UPDATE users SET name = ? WHERE id = ?");
 $stmt->execute([$new_name, (int) $_SESSION['user_id']]);
+$_SESSION['name'] = $new_name;
 
 // ✅ Log to name_history
 $stmt = $pdo->prepare("

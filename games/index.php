@@ -248,6 +248,7 @@ $whackOnlineUsers = getOnlinePlayersByGame('whack');
                 </div>
             </div>
 
+            <!-- To update in the future
             <div class="game-card coming-soon">
                 <div class="game-icon">🐍</div>
                 <h2>Snake</h2>
@@ -267,6 +268,8 @@ $whackOnlineUsers = getOnlinePlayersByGame('whack');
                     <button class="btn-play disabled" disabled>Coming Soon</button>
                 </div>
             </div>
+
+            -->
 
             <div class="game-card">
                 <div class="game-icon">👆</div>

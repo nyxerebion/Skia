@@ -75,6 +75,7 @@ if ($stmt->fetch()) {
 // ✅ Update username
 $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
 $stmt->execute([$new_username, $_SESSION['user_id']]);
+$_SESSION['username'] = $new_username;
 
 // ✅ Log to name_history
 $stmt = $pdo->prepare("
