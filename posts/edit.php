@@ -39,6 +39,20 @@ if (!$is_owner && !$is_admin) {
 if ($is_admin && !$is_owner && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_post'])) {
     validateCSRFToken($_POST['csrf_token'] ?? '');
 
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM pending_actions
+        WHERE target_id = ?
+        AND target_type = 'post'
+        AND action_type = 'edit_post'
+        AND status = 'pending'
+    ");
+    $stmt->execute([$id]);
+    if ($stmt->fetchColumn() > 0) {
+        setFlashMessage('An edit request is already pending for this post.', 'warning');
+        header('Location: index.php');
+        exit;
+    }
+
     $content = trim($_POST['content'] ?? '');
     $original = trim($post['content']);
 

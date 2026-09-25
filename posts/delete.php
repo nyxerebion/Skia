@@ -40,6 +40,20 @@ if (!$is_owner && !$is_admin) {
 if ($is_admin && !$is_owner && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_post'])) {
     validateCSRFToken($_POST['csrf_token'] ?? '');
 
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM pending_actions
+        WHERE target_id = ?
+        AND target_type = 'post'
+        AND action_type = 'delete_post'
+        AND status = 'pending'
+    ");
+    $stmt->execute([$post_id]);
+    if ($stmt->fetchColumn() > 0) {
+        setFlashMessage('A delete request is already pending for this post.', 'warning');
+        header('Location: index.php');
+        exit;
+    }
+
     $data = json_encode(['post_id' => $post_id]);
 
     $stmt = $pdo->prepare("
