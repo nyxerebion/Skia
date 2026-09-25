@@ -33,7 +33,7 @@ const channel = new BroadcastChannel("click_adventure");
 
 channel.onmessage = (event) => {
   if (event.data.type === "stats_updated") {
-    console.log("Stats changed in another tab – reloading...");
+    // console.log("Stats changed in another tab – reloading...");
     loadStats();
   }
 };
@@ -254,7 +254,7 @@ function updateStatsDisplay(stats) {
   }
 
   if (stats.updated_at && stats.updated_at <= lastUpdate) {
-    console.log("Skipping stale data");
+    // console.log("Skipping stale data");
     return;
   }
 
@@ -390,9 +390,9 @@ function healthCheck() {
           showReviveModal(data.stats);
         }
 
-        if (data.message) {
+        /* if (data.message) {
           console.log("Health check:", data.message);
-        }
+        } */
       }
     })
     .catch((err) => console.error("Health check error:", err));
