@@ -10,7 +10,7 @@ if (!checkLogin()) {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $follow_id = (int)($input['user_id'] ?? 0);
-$ip = $_SERVER['REMOTE_ADDR'];
+$ip = getRealIP();
 
 if (!$follow_id) {
     recordRateLimitAttempt($pdo, $ip, 'follow_invalid');
@@ -38,17 +38,19 @@ if ($is_following) {
     // Unfollow
     $stmt = $pdo->prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?");
     $stmt->execute([$_SESSION['user_id'], $follow_id]);
-    clearRateLimit($pdo, $ip, $action);
-    clearRateLimit($pdo, $ip, 'follow_global');
     echo json_encode(['success' => true, 'following' => false]);
 } else {
     // Follow
-    $stmt = $pdo->prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)");
-    $stmt->execute([$_SESSION['user_id'], $follow_id]);
-
-    clearRateLimit($pdo, $ip, $action);
-    clearRateLimit($pdo, $ip, 'follow_global');
-    echo json_encode(['success' => true, 'following' => true]);
+    try {
+        $stmt = $pdo->prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)");
+        $stmt->execute([$_SESSION['user_id'], $follow_id]);
+    } catch (PDOException $e) {
+        if ($e->getCode() === '23000') { // duplicate
+            echo json_encode(['success' => true, 'following' => true]);
+            exit;
+        }
+        throw $e;
+    }
 
     // Check if a follow notification was sent in the last 60 seconds
     $stmt = $pdo->prepare("
@@ -61,7 +63,7 @@ if ($is_following) {
     ");
     $stmt->execute([
         $follow_id,
-        '%' . $_SESSION['username'] . '%started following you%'
+        '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $_SESSION['username']) . '%started following you%'
     ]);
     $last_notification = $stmt->fetchColumn();
 
@@ -79,4 +81,6 @@ if ($is_following) {
             $follow_id
         );
     }
+
+    echo json_encode(['success' => true, 'following' => true]);
 }
