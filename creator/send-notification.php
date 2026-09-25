@@ -17,7 +17,7 @@ $user_ids = $_POST['user_ids'] ?? [];
 
 if (empty($title) || empty($message)) {
     setFlashMessage('Title and message are required.', 'danger');
-    header('Location: notifications.php');
+    header('Location: ' . SITE_URL . '/creator/notifications.php');
     exit;
 }
 
