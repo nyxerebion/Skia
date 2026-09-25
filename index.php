@@ -334,8 +334,8 @@ $top_points = $stmt->fetch();
                             <span class="span-date post-preview-date"><?= timeAgo($post['created_at']) ?></span>
                         </div>
                         <p class="post-preview-content">
-                            <?= nl2br(htmlspecialchars(substr($post['content'], 0, 150))) ?>
-                            <?php if (strlen($post['content']) > 150): ?>...<?php endif; ?>
+                            <?= nl2br(htmlspecialchars(mb_substr($post['content'], 0, 150))) ?>
+                            <?php if (mb_strlen($post['content']) > 150): ?>...<?php endif; ?>
                         </p>
                         <div class="post-preview-stats">
                             <span>❤️ <?= $post['like_count'] ?></span>

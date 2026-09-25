@@ -1,6 +1,6 @@
 <?php
 
-define('TRUSTED_PROXIES', ['10.0.0.1', '10.0.0.2', '127.0.0.1']);
+define('TRUSTED_PROXIES', []);
 define('PROXY_HEADERS', ['HTTP_X_FORWARDED_FOR', 'HTTP_CF_CONNECTING_IP']);
 
 function secure_session_regenerate()

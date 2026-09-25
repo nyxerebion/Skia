@@ -129,7 +129,7 @@ if (isset($_GET['edit'])) {
                                 <h4><?= htmlspecialchars($note['note_title']) ?></h4>
                                 <span class="note-date"><?= date('M d, Y', strtotime($note['created_at'])) ?></span>
                             </div>
-                            <p><?= nl2br(htmlspecialchars(substr($note['note_content'], 0, 150))) ?>...</p>
+                            <p><?= nl2br(htmlspecialchars(mb_substr($note['note_content'], 0, 150))) ?>...</p>
                             <div class="note-actions">
                                 <a href="?edit=<?= $note['id'] ?>" class="btn-edit">Edit</a>
                                 <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this note?')">

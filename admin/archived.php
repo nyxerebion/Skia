@@ -363,7 +363,7 @@ $archived_posts = $stmt->fetchAll();
                 <div class="archived-card">
                     <span class="meta">#<?= htmlspecialchars($a_post['id']) ?></span>
                     <span class="meta"><?= htmlspecialchars($a_post['username']) ?></span>
-                    <span class="content"><?= nl2br(htmlspecialchars(substr($a_post['content'], 0, 100))) ?></span>
+                    <span class="content"><?= nl2br(htmlspecialchars(mb_substr($a_post['content'], 0, 100))) ?></span>
                     <span class="meta">Deleted: <?= date('M d, Y h:i A', strtotime($a_post['archived_at'])) ?></span>
 
                     <form method="POST" style="display:inline;">
