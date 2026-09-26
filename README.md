@@ -38,7 +38,7 @@ Built as a portfolio project to demonstrate full-stack PHP development, security
 
 Try the live app without registering:
 
-- **URL:** https://skia.unaux.com/security/login.php
+- **URL:** `https://skia.unaux.com/security/login.php`
 - **Username:** `demo`
 - **Password:** `demo1234`
 
