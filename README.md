@@ -46,42 +46,6 @@ The demo account has standard user role. Do not store anything sensitive.
 
 ---
 
-## Security
-
-Security was treated as a first-class concern throughout the project.
-
-- Session hardening — `use_strict_mode`, `use_only_cookies`, HttpOnly, SameSite=Lax, regeneration on privilege change
-- CSRF tokens on all state-changing requests, including `sendBeacon` calls
-- Rate limiting on auth endpoints (login, register, password reset, password verification)
-- Prepared statements (PDO) throughout — no string-concatenated queries
-- Password hashing via `password_hash()` / `password_verify()`
-- Upload validation — extension whitelist, size limit, WebP→JPG conversion
-- Output escaping via `htmlspecialchars()` at every render point
-- Transactions with `SELECT ... FOR UPDATE` on game state writes
-- Enforced Content Security Policy, HSTS on production, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`
-- Activity logging and audit trails for account changes (name, username, bio, avatar history)
-- Unified error responses to prevent account enumeration
-
----git add README.md
-git commit -m "Add security notes to README"
-git push
-
-## Security Notes
-
-### Account enumeration in login
-
-The login flow initially returned "Username doesn't exist" for unknown users and "Invalid password" for known users. An attacker could use this to enumerate valid usernames. Fixed by returning a single "Invalid credentials" error and recording a rate-limit attempt in both cases. See `security/login.php`.
-
-### Rate limit cleared on success
-
-The follow endpoint cleared its rate-limit counter after every successful request, so a user who ever succeeded could exceed the intended limit. Fixed by removing the `clearRateLimit` calls from the success paths. See `api/follow.php`.
-
-### Lost updates on concurrent attacks
-
-Two tabs attacking the same enemy could both read the same health, compute damage, and one write would overwrite the other. Fixed by wrapping the read-modify-write in a transaction with `SELECT ... FOR UPDATE`. See `api/games/click-attack.php`.
-
----
-
 ## Features
 
 ### 🎮 Games
@@ -171,7 +135,7 @@ skia/
    composer install
    ```
 
-3. Create `.env` in the project root from the template (see below) and fill in real values.
+3. Create `.env` in the project root from `.env.example` and fill in real values.
 
 4. Create the database and import the schema:
 
@@ -184,27 +148,7 @@ skia/
 
 6. Visit `/guest-page.php` in the browser.
 
-### Environment Variables
-
-`.env` must exist at the project root. Required keys:
-
-```env
-DB_HOST=localhost
-DB_NAME=skiadb
-DB_USER=root
-DB_PASS=
-
-HASHIDS_SALT=replace_with_random_string
-
-SMTP_HOST=in-v3.mailjet.com
-SMTP_PORT=587
-SMTP_USERNAME=
-SMTP_PASSWORD=
-SMTP_FROM=you@example.com
-SMTP_NAME=Skia
-```
-
-`HASHIDS_SALT` must be a non-empty random string. Without it, encoded IDs are predictable.
+See [`.env.example`](.env.example) for the required environment variables.
 
 ---
 
@@ -215,6 +159,12 @@ SMTP_NAME=Skia
 - **Archive over delete** — posts and notes are marked `archived = 1` rather than deleted, with `archived_at` and `archived_by` recorded for audit. Only creator actions trigger permanent deletion.
 - **Role as enum, not a table** — the three roles (`user`, `admin`, `creator`) are fixed by design. A lookup table would add joins for no flexibility gain.
 - **Admin approval workflow** — admins cannot edit or delete another user's content directly. Actions are queued in `pending_actions` and approved or rejected by a creator.
+
+---
+
+## Security
+
+Skia was built with security as a first-class concern. See [SECURITY.md](SECURITY.md) for the full list of controls, vulnerabilities found and fixed during development, and results of the OWASP ZAP scan.
 
 ---
 
