@@ -20,7 +20,6 @@ if (file_exists($project_root . '/.env') && class_exists(Dotenv::class)) {
 ini_set('session.cache_limiter', 'nocache');
 ini_set('session.cache_expire', '0');
 ini_set('session.cookie_lifetime', 0);
-ini_set('expose_php', 0);
 
 // 2. START SESSION HERE
 if (session_status() === PHP_SESSION_NONE) {
