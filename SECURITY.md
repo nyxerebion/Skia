@@ -141,4 +141,6 @@ No High severity findings. Medium and Low findings on static assets are expected
 
 ---
 
-**Last updated: 2026-09-26**
+## Last Updated
+
+2026-09-26
