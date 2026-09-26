@@ -1,2 +1,16 @@
-# Custom 404 Not Found Error Page
-ErrorDocument 404 https://profreehost.com/404/index.php
+# 404 handler
+ErrorDocument 404 https://skia.unaux.com/404.php
+
+# Block direct web access to non-public directories
+RedirectMatch 404 ^/(backend|core|database)(/|$)
+
+# In security/, allow only the public entry points
+RedirectMatch 404 ^/security/(?!login\.php$|register\.php$|logout\.php$|forgot-password\.php$|reset-password\.php$|reset-sent\.php$).+\.php$
+
+# Block SQL and common sensitive files
+<FilesMatch "\.(sql|log|env|ini|json|lock|md|bak|old|swp)$">
+    Require all denied
+</FilesMatch>
+
+# Block dotfiles except .well-known (needed by some hosts for ACME)
+RedirectMatch 404 /\.(?!well-known/).*
