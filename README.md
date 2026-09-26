@@ -34,18 +34,6 @@ Built as a portfolio project to demonstrate full-stack PHP development, security
 
 ---
 
-## Demo Account
-
-Try the live app without registering:
-
-- **URL:** `https://skia.unaux.com/security/login.php`
-- **Username:** `demo`
-- **Password:** `demo1234`
-
-The demo account has standard user role. Do not store anything sensitive.
-
----
-
 ## Features
 
 ### 🎮 Games
