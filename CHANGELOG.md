@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Undefined `$id` before use in `admin/archived.php`
 - `content.disabled` and `"errors"` typos in `js/posts.js`
 - Removed duplicate `markRead` handler in `index.php` (event delegation already handles clicks)
+- `.htaccess` blocked `/security/*` entry points, causing login and password-reset to return 404
 
 ### Removed
 
