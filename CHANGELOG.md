@@ -57,7 +57,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `creator/notif.sql`, `games/click.sql`, `games/whack.sql` (superseded by `database/schema.sql`)
 - Editor copy files (`api/mark-all-read copy.php`, `css/contents copy.css`, `js/settings copy.js`, `security/register copy.php`)
 - `ini_set('expose_php', 0)` from `core/bootstrap.php` (cannot be set at runtime)
-
-```
-
-```
