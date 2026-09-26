@@ -58,23 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Editor copy files (`api/mark-all-read copy.php`, `css/contents copy.css`, `js/settings copy.js`, `security/register copy.php`)
 - `ini_set('expose_php', 0)` from `core/bootstrap.php` (cannot be set at runtime)
 
----
+```
 
-## Format Reference
-
-### Types of Changes
-
-- `Added` — new features
-- `Changed` — changes to existing functionality
-- `Deprecated` — features that will be removed
-- `Removed` — features removed
-- `Fixed` — bug fixes
-- `Security` — vulnerabilities fixed (add a section when applicable)
-
-### Versioning
-
-- **MAJOR** — incompatible changes
-- **MINOR** — new features, backwards compatible
-- **PATCH** — bug fixes, backwards compatible
-
-Until a `1.0.0` release, the project stays in `[Unreleased]`. When you tag the first stable version, move the entries into a `## [1.0.0] - YYYY-MM-DD` section.
+```
