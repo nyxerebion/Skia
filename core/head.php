@@ -3,6 +3,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, private">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta name="is-logged-in" content="<?= checkLogin() ? '1' : '0' ?>">
 
 <?php
 $notRegisterPage = $_SERVER['PHP_SELF'] !== 'register.php';
@@ -35,7 +36,7 @@ if ($isMaintenance) {
         // If already on the maintenance page, do nothing
         return;
     }
-    
+
     header("Location: " . SITE_URL . "/core/maintenance.php");
     exit;
 } else {

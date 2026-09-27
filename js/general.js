@@ -11,6 +11,9 @@ const SITE_URL = isLocalhost
   ? "http://localhost/skia"
   : "https://skia.unaux.com";
 
+const isLoggedIn =
+  document.querySelector('meta[name="is-logged-in"]')?.content === "1";
+
 function initializeElements() {
   sidebar = document.querySelector("aside");
   sidebar_title = document.querySelector(".sidebar-title");
@@ -381,6 +384,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function getOnlineUsers() {
+  if (!isLoggedIn) return;
+
   const meta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = meta ? meta.content : "";
 
@@ -395,20 +400,20 @@ function getOnlineUsers() {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success) {
-        // Update count
-        const onlineUsersElement = document.querySelector(".online-users");
-        if (onlineUsersElement) {
-          updateOnlineCountDisplay(data.online_users_count);
+      if (!data.success) return;
 
-          const onlineUsersCount = document.getElementById("onlineUsersCount");
-          if (onlineUsersCount)
-            onlineUsersCount.textContent = `(${data.online_users_count})`;
-        }
+      // Update count
+      const onlineUsersElement = document.querySelector(".online-users");
+      if (onlineUsersElement) {
+        updateOnlineCountDisplay(data.online_users_count);
 
-        // Update user list
-        updateOnlineUsersDisplay(data.online_users);
+        const onlineUsersCount = document.getElementById("onlineUsersCount");
+        if (onlineUsersCount)
+          onlineUsersCount.textContent = `(${data.online_users_count})`;
       }
+
+      // Update user list
+      updateOnlineUsersDisplay(data.online_users);
     })
     .catch((error) => {
       console.error("Error fetching online users:", error);
@@ -439,6 +444,8 @@ setInterval(
 );
 
 function getUserStatuses() {
+  if (!isLoggedIn) return;
+
   const meta = document.querySelector('meta[name="csrf-token"]');
   const csrfToken = meta ? meta.content : "";
 
@@ -453,11 +460,11 @@ function getUserStatuses() {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success) {
-        data.users.forEach((user) => {
-          updateUserStatus(user.id, user.status);
-        });
-      }
+      if (!data.success || !data.users) return;
+
+      data.users.forEach((user) => {
+        updateUserStatus(user.id, user.status);
+      });
     })
     .catch((error) => {
       console.error("Error fetching user statuses:", error);
@@ -508,8 +515,8 @@ function updateOnlineUsersDisplay(users) {
       controlsHtml = `<span class="self-label">You</span>`;
     } else {
       controlsHtml = `
-                <button class="follow-btn ${followClass}" 
-                        data-user="${user.id}" 
+                <button class="follow-btn ${followClass}"
+                        data-user="${user.id}"
                         onclick="event.stopPropagation(); event.preventDefault(); toggleFollow(${user.id});">
                     ${followText}
                 </button>
@@ -647,7 +654,7 @@ function autoResize(textarea) {
 }
 
 function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }

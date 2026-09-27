@@ -10,8 +10,8 @@ if (!checkLogin()) {
 logAction('Viewed Home Page');
 
 $stmt = $pdo->prepare("
-    SELECT * FROM users 
-    ORDER BY id DESC 
+    SELECT * FROM users
+    ORDER BY id DESC
     LIMIT 5");
 $stmt->execute();
 $users = $stmt->fetchAll();
@@ -20,8 +20,8 @@ $stmt = $pdo->prepare("
     SELECT u.*,
      users.username
     FROM updates u
-    JOIN users ON u.user_id = users.id 
-    ORDER BY u.created_at DESC 
+    JOIN users ON u.user_id = users.id
+    ORDER BY u.created_at DESC
     LIMIT 3");
 $stmt->execute();
 $updates = $stmt->fetchAll();
