@@ -1,4 +1,5 @@
 <?php
+// click-attack.php
 require_once __DIR__ . '/../../core/bootstrap.php';
 
 header('Content-Type: application/json');

@@ -1,6 +1,7 @@
 <?php
 
-function getEnemies() {
+function getEnemies()
+{
     return [
         1 => [
             'name' => 'Rowan',
@@ -91,17 +92,39 @@ function getEnemies() {
             'critChance' => 30,
             'critMultiplier' => 3.5,
             'xp' => 10000
-        ]
+        ],
+        10 => [
+            'name' => 'Avril',
+            'health' => 1000000,
+            'damage' => 5000,
+            'defense' => 250,
+            'reward' => 80000,
+            'critChance' => 50,
+            'critMultiplier' => 4.2,
+            'xp' => 25000
+        ],
+        11 => [
+            'name' => 'Avril 2.0',
+            'health' => 10000000,
+            'damage' => 10000,
+            'defense' => 1000,
+            'reward' => 100000,
+            'critChance' => 70,
+            'critMultiplier' => 5,
+            'xp' => 50000
+        ],
     ];
 }
 
-function getEnemyByLevel($level) {
+function getEnemyByLevel($level)
+{
     $enemies = getEnemies();
     $level = (int) $level;
     $level = max(1, min($level, count($enemies)));
     return $enemies[$level] ?? $enemies[1];
 }
 
-function getMaxEnemyLevel() {
+function getMaxEnemyLevel()
+{
     return max(array_keys(getEnemies()));
 }

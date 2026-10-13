@@ -2,8 +2,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, private">
 <meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="is-logged-in" content="<?= checkLogin() ? '1' : '0' ?>">
+
+<?php $isLoggedIn = checkLogin(); ?>
+<meta name="is-logged-in" content="<?= $isLoggedIn ? '1' : '0' ?>">
 
 <?php
 $notRegisterPage = $_SERVER['PHP_SELF'] !== 'register.php';

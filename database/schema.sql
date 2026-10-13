@@ -307,7 +307,7 @@ CREATE TABLE IF NOT EXISTS name_history (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- BIO HISTORY 
+-- BIO HISTORY
 -- ============================================
 CREATE TABLE IF NOT EXISTS bio_history (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -323,7 +323,7 @@ CREATE TABLE IF NOT EXISTS bio_history (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- AVATAR HISTORY 
+-- AVATAR HISTORY
 -- ============================================
 CREATE TABLE IF NOT EXISTS avatar_history (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
